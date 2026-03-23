@@ -1,0 +1,29 @@
+# Maven
+target/
+*.jar
+*.war
+*.ear
+*.class
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.eclipse/
+*.project
+*.classpath
+*.settings/
+
+# Spring Boot
+application-local.properties
+application-prod.properties
+
+# Environment / Secrets — NEVER commit these!
+.env
+*.env
+secrets.properties
+
+# OS
+.DS_Store
+Thumbs.db
