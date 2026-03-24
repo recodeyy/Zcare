@@ -45,6 +45,7 @@ User implements UserDetails {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Builder.Default
     private boolean active = true;
 
     @PrePersist

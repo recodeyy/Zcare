@@ -7,8 +7,12 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,9 +28,9 @@ public class MedicineController {
     private final MedicineService medicineService;
 
     @GetMapping
-    @Operation(summary = "Get all medicines", description = "Returns full inventory list")
-    public ResponseEntity<List<Medicine>> getAllMedicines() {
-        return ResponseEntity.ok(medicineService.getAllMedicines());
+    @Operation(summary = "Get medicines (Paginated)")
+    public ResponseEntity<Page<Medicine>> getAllMedicines(@PageableDefault(size = 10, sort = "id") Pageable pageable) {
+        return ResponseEntity.ok(medicineService.getAllMedicines(pageable));
     }
 
     @GetMapping("/{id}")
@@ -39,7 +43,7 @@ public class MedicineController {
     @PostMapping
     @Operation(summary = "Add new medicine to inventory")
     @PreAuthorize("hasAnyRole('ADMIN', 'PHARMACIST')")
-    public ResponseEntity<Medicine> addMedicine(@RequestBody Medicine medicine) {
+    public ResponseEntity<Medicine> addMedicine(@Valid @RequestBody Medicine medicine) {
         return ResponseEntity.ok(medicineService.addMedicine(medicine));
     }
 
@@ -47,7 +51,7 @@ public class MedicineController {
     @Operation(summary = "Update medicine details")
     @PreAuthorize("hasAnyRole('ADMIN', 'PHARMACIST')")
     public ResponseEntity<Medicine> updateMedicine(@PathVariable Long id,
-                                                    @RequestBody Medicine medicine) {
+                                                    @Valid @RequestBody Medicine medicine) {
         return ResponseEntity.ok(medicineService.updateMedicine(id, medicine));
     }
 
@@ -60,32 +64,35 @@ public class MedicineController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search medicines by name")
-    public ResponseEntity<List<Medicine>> searchMedicines(
-            @Parameter(description = "Search keyword") @RequestParam String name) {
-        return ResponseEntity.ok(medicineService.searchByName(name));
+    @Operation(summary = "Search medicines by name (Paginated)")
+    public ResponseEntity<Page<Medicine>> searchMedicines(
+            @RequestParam String name,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(medicineService.searchByName(name, pageable));
     }
 
     @GetMapping("/category/{category}")
-    @Operation(summary = "Get medicines by category")
-    public ResponseEntity<List<Medicine>> getByCategory(@PathVariable String category) {
-        return ResponseEntity.ok(medicineService.getByCategory(category));
+    @Operation(summary = "Get medicines by category (Paginated)")
+    public ResponseEntity<Page<Medicine>> getByCategory(
+            @PathVariable String category,
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(medicineService.getByCategory(category, pageable));
     }
 
     @GetMapping("/expiring-soon")
-    @Operation(summary = "Get medicines expiring soon",
-               description = "Default: medicines expiring within 30 days")
-    public ResponseEntity<List<Medicine>> getExpiringSoon(
-            @RequestParam(defaultValue = "30") int days) {
-        return ResponseEntity.ok(medicineService.getExpiringSoon(days));
+    @Operation(summary = "Get medicines expiring soon (Paginated)")
+    public ResponseEntity<Page<Medicine>> getExpiringSoon(
+            @RequestParam(defaultValue = "30") int days,
+            @PageableDefault(size = 10, sort = "expiryDate") Pageable pageable) {
+        return ResponseEntity.ok(medicineService.getExpiringSoon(days, pageable));
     }
 
     @GetMapping("/low-stock")
-    @Operation(summary = "Get medicines with low stock",
-               description = "Default threshold: 10 units")
-    public ResponseEntity<List<Medicine>> getLowStock(
-            @RequestParam(defaultValue = "10") int threshold) {
-        return ResponseEntity.ok(medicineService.getLowStock(threshold));
+    @Operation(summary = "Get medicines with low stock (Paginated)")
+    public ResponseEntity<Page<Medicine>> getLowStock(
+            @RequestParam(defaultValue = "10") int threshold,
+            @PageableDefault(size = 10, sort = "stockQuantity") Pageable pageable) {
+        return ResponseEntity.ok(medicineService.getLowStock(threshold, pageable));
     }
 
     @PatchMapping("/{id}/stock")

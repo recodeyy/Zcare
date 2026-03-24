@@ -3,19 +3,25 @@ package com.pharmacy.service;
 import com.pharmacy.model.Medicine;
 import com.pharmacy.repository.MedicineRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class MedicineService {
 
     private final MedicineRepository medicineRepository;
 
-    public List<Medicine> getAllMedicines() {
-        return medicineRepository.findAll();
+    public Page<Medicine> getAllMedicines(Pageable pageable) {
+        log.debug("Fetching medicines: {}", pageable);
+        return medicineRepository.findAll(pageable);
     }
 
     public Medicine getMedicineById(Long id) {
@@ -24,14 +30,28 @@ public class MedicineService {
     }
 
     public Medicine addMedicine(Medicine medicine) {
+        log.info("Adding new medicine: {} (Batch: {})", medicine.getName(), medicine.getBatchNumber());
         if (medicineRepository.existsByBatchNumber(medicine.getBatchNumber())) {
             throw new IllegalArgumentException("Batch number already exists: " + medicine.getBatchNumber());
         }
         return medicineRepository.save(medicine);
     }
 
+    @Transactional
     public Medicine updateMedicine(Long id, Medicine updated) {
+        log.info("Updating medicine ID: {}", id);
         Medicine existing = getMedicineById(id);
+
+        // Check if batch number is changing and if it conflicts with another record
+        if (updated.getBatchNumber() != null && !updated.getBatchNumber().equals(existing.getBatchNumber())) {
+            medicineRepository.findByBatchNumber(updated.getBatchNumber()).ifPresent(m -> {
+                if (!m.getId().equals(id)) {
+                    throw new IllegalArgumentException("Batch number " + updated.getBatchNumber() + " is already used by another medicine.");
+                }
+            });
+            existing.setBatchNumber(updated.getBatchNumber());
+        }
+
         existing.setName(updated.getName());
         existing.setGenericName(updated.getGenericName());
         existing.setCategory(updated.getCategory());
@@ -41,32 +61,40 @@ public class MedicineService {
         existing.setExpiryDate(updated.getExpiryDate());
         existing.setDescription(updated.getDescription());
         existing.setUnit(updated.getUnit());
+
         return medicineRepository.save(existing);
     }
 
     public void deleteMedicine(Long id) {
+        log.warn("Deleting medicine ID: {}", id);
         getMedicineById(id); // Validate exists
         medicineRepository.deleteById(id);
     }
 
-    public List<Medicine> searchByName(String name) {
-        return medicineRepository.findByNameContainingIgnoreCase(name);
+    public Page<Medicine> searchByName(String name, Pageable pageable) {
+        log.debug("Searching medicines by name: {} with {}", name, pageable);
+        return medicineRepository.findByNameContainingIgnoreCase(name, pageable);
     }
 
-    public List<Medicine> getByCategory(String category) {
-        return medicineRepository.findByCategoryIgnoreCase(category);
+    public Page<Medicine> getByCategory(String category, Pageable pageable) {
+        log.debug("Filtering medicines by category: {} with {}", category, pageable);
+        return medicineRepository.findByCategoryIgnoreCase(category, pageable);
     }
 
-    public List<Medicine> getExpiringSoon(int days) {
+    public Page<Medicine> getExpiringSoon(int days, Pageable pageable) {
         LocalDate cutoffDate = LocalDate.now().plusDays(days);
-        return medicineRepository.findExpiringSoon(cutoffDate);
+        log.debug("Fetching expiring medicines (before {}) with {}", cutoffDate, pageable);
+        return medicineRepository.findExpiringSoon(cutoffDate, pageable);
     }
 
-    public List<Medicine> getLowStock(int threshold) {
-        return medicineRepository.findLowStock(threshold);
+    public Page<Medicine> getLowStock(int threshold, Pageable pageable) {
+        log.debug("Fetching low-stock medicines (below {}) with {}", threshold, pageable);
+        return medicineRepository.findLowStock(threshold, pageable);
     }
 
+    @Transactional
     public Medicine adjustStock(Long id, int quantity) {
+        log.info("Adjusting stock for ID {}: quantity flux {}", id, quantity);
         Medicine medicine = getMedicineById(id);
         int newQty = medicine.getStockQuantity() + quantity;
         if (newQty < 0) {
