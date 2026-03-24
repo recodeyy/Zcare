@@ -32,8 +32,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthFilter;
-    private final UserDetailsService userDetailsService;
+    private final JwtAuthFilter jwtAuthFilter = null;
+    private final UserDetailsService userDetailsService = null;
 
     @Value("${cors.allowed-origins}")
     private String allowedOrigins;

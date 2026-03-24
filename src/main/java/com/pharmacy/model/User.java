@@ -19,7 +19,8 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User implements UserDetails {
+public class
+User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -65,6 +66,16 @@ public class User implements UserDetails {
     public boolean isCredentialsNonExpired(){ return true; }
     @Override
     public boolean isEnabled()              { return active; }
+
+    @Override
+    public String getPassword() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    public String getUsername() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 
     public enum Role {
         ADMIN,
