@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.lang.NonNull;
+
 
 import java.util.List;
 import java.util.Map;
@@ -31,26 +33,30 @@ public class UserController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get user by ID", description = "Admin only")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<User> getUserById(@PathVariable @NonNull Long id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
 
+
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a user account", description = "Admin only")
-    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable @NonNull Long id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
     }
 
+
     @PatchMapping("/{id}/role")
     @Operation(summary = "Update user role", description = "Admin only")
-    public ResponseEntity<User> updateRole(@PathVariable Long id, @RequestParam User.Role role) {
+    public ResponseEntity<User> updateRole(@PathVariable @NonNull Long id, @RequestParam @NonNull User.Role role) {
         return ResponseEntity.ok(userService.updateRole(id, role));
     }
 
+
     @PatchMapping("/{id}/status")
     @Operation(summary = "Activate/Deactivate user account", description = "Admin only")
-    public ResponseEntity<User> updateStatus(@PathVariable Long id, @RequestParam boolean active) {
+    public ResponseEntity<User> updateStatus(@PathVariable @NonNull Long id, @RequestParam boolean active) {
         return ResponseEntity.ok(userService.updateStatus(id, active));
     }
+
 }

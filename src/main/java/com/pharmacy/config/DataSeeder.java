@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Objects;
+
+
 
 @Component
 @RequiredArgsConstructor
@@ -42,7 +45,7 @@ public class DataSeeder implements CommandLineRunner {
                 .role(User.Role.ADMIN)
                 .active(true)
                 .build();
-        userRepository.save(admin);
+        userRepository.save(Objects.requireNonNull(admin));
 
         User pharmacist = User.builder()
                 .username("pharmacist")
@@ -52,7 +55,8 @@ public class DataSeeder implements CommandLineRunner {
                 .role(User.Role.PHARMACIST)
                 .active(true)
                 .build();
-        userRepository.save(pharmacist);
+        userRepository.save(Objects.requireNonNull(pharmacist));
+
 
         log.info("========================================");
         log.info("  DEFAULT USERS CREATED:");
@@ -68,37 +72,38 @@ public class DataSeeder implements CommandLineRunner {
             return;
         }
 
-        medicineRepository.save(Medicine.builder()
+        medicineRepository.save(Objects.requireNonNull(Medicine.builder()
                 .name("Paracetamol 500mg").genericName("Acetaminophen")
                 .category("Analgesic").manufacturer("Sun Pharma")
                 .batchNumber("BATCH-001").price(new BigDecimal("5.50"))
                 .stockQuantity(200).expiryDate(LocalDate.now().plusMonths(18))
                 .unit("tablet").description("Pain reliever and fever reducer")
-                .build());
+                .build()));
 
-        medicineRepository.save(Medicine.builder()
+        medicineRepository.save(Objects.requireNonNull(Medicine.builder()
                 .name("Amoxicillin 250mg").genericName("Amoxicillin")
                 .category("Antibiotic").manufacturer("Cipla")
                 .batchNumber("BATCH-002").price(new BigDecimal("12.00"))
                 .stockQuantity(150).expiryDate(LocalDate.now().plusMonths(12))
                 .unit("capsule").description("Broad-spectrum antibiotic")
-                .build());
+                .build()));
 
-        medicineRepository.save(Medicine.builder()
+        medicineRepository.save(Objects.requireNonNull(Medicine.builder()
                 .name("Metformin 500mg").genericName("Metformin HCl")
                 .category("Antidiabetic").manufacturer("Dr. Reddy's")
                 .batchNumber("BATCH-003").price(new BigDecimal("8.00"))
                 .stockQuantity(8).expiryDate(LocalDate.now().plusMonths(24))
                 .unit("tablet").description("Type 2 diabetes management")
-                .build());
+                .build()));
 
-        medicineRepository.save(Medicine.builder()
+        medicineRepository.save(Objects.requireNonNull(Medicine.builder()
                 .name("Cetirizine 10mg").genericName("Cetirizine HCl")
                 .category("Antihistamine").manufacturer("Mankind")
                 .batchNumber("BATCH-004").price(new BigDecimal("3.50"))
                 .stockQuantity(300).expiryDate(LocalDate.now().plusDays(20))
                 .unit("tablet").description("Allergy relief")
-                .build());
+                .build()));
+
 
         log.info("Sample medicines seeded successfully.");
     }

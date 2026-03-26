@@ -9,8 +9,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import org.springframework.lang.NonNull;
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Objects;
+
+
+
+
 
 @Service
 @RequiredArgsConstructor
@@ -19,28 +24,31 @@ public class MedicineService {
 
     private final MedicineRepository medicineRepository;
 
-    public Page<Medicine> getAllMedicines(Pageable pageable) {
+    public Page<Medicine> getAllMedicines(@NonNull Pageable pageable) {
+
         log.debug("Fetching medicines: {}", pageable);
         return medicineRepository.findAll(pageable);
     }
 
-    public Medicine getMedicineById(Long id) {
+    public Medicine getMedicineById(@NonNull Long id) {
+
         return medicineRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Medicine not found with id: " + id));
     }
 
-    public Medicine addMedicine(Medicine medicine) {
+    public Medicine addMedicine(@NonNull Medicine medicine) {
         log.info("Adding new medicine: {} (Batch: {})", medicine.getName(), medicine.getBatchNumber());
         if (medicineRepository.existsByBatchNumber(medicine.getBatchNumber())) {
             throw new IllegalArgumentException("Batch number already exists: " + medicine.getBatchNumber());
         }
-        return medicineRepository.save(medicine);
+        return medicineRepository.save(Objects.requireNonNull(medicine));
     }
 
     @Transactional
-    public Medicine updateMedicine(Long id, Medicine updated) {
+    public Medicine updateMedicine(@NonNull Long id, @NonNull Medicine updated) {
         log.info("Updating medicine ID: {}", id);
         Medicine existing = getMedicineById(id);
+
 
         // Check if batch number is changing and if it conflicts with another record
         if (updated.getBatchNumber() != null && !updated.getBatchNumber().equals(existing.getBatchNumber())) {
@@ -65,11 +73,12 @@ public class MedicineService {
         return medicineRepository.save(existing);
     }
 
-    public void deleteMedicine(Long id) {
+    public void deleteMedicine(@NonNull Long id) {
         log.warn("Deleting medicine ID: {}", id);
         getMedicineById(id); // Validate exists
         medicineRepository.deleteById(id);
     }
+
 
     public Page<Medicine> searchByName(String name, Pageable pageable) {
         log.debug("Searching medicines by name: {} with {}", name, pageable);
@@ -93,7 +102,7 @@ public class MedicineService {
     }
 
     @Transactional
-    public Medicine adjustStock(Long id, int quantity) {
+    public Medicine adjustStock(@NonNull Long id, int quantity) {
         log.info("Adjusting stock for ID {}: quantity flux {}", id, quantity);
         Medicine medicine = getMedicineById(id);
         int newQty = medicine.getStockQuantity() + quantity;
@@ -101,6 +110,7 @@ public class MedicineService {
             throw new IllegalArgumentException("Insufficient stock. Available: " + medicine.getStockQuantity());
         }
         medicine.setStockQuantity(newQty);
-        return medicineRepository.save(medicine);
+        return medicineRepository.save(Objects.requireNonNull(medicine));
     }
+
 }

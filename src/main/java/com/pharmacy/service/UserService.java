@@ -3,7 +3,11 @@ package com.pharmacy.service;
 import com.pharmacy.model.User;
 import com.pharmacy.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
+
+
+
 
 import java.util.List;
 
@@ -17,25 +21,28 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User getUserById(Long id) {
+    public User getUserById(@NonNull Long id) {
+
         return userRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + id));
     }
 
-    public void deleteUser(Long id) {
+    public void deleteUser(@NonNull Long id) {
         User user = getUserById(id);
-        userRepository.delete(user);
+        userRepository.delete(java.util.Objects.requireNonNull(user));
     }
 
-    public User updateRole(Long id, User.Role role) {
+    public User updateRole(@NonNull Long id, @NonNull User.Role role) {
         User user = getUserById(id);
         user.setRole(role);
-        return userRepository.save(user);
+        return userRepository.save(java.util.Objects.requireNonNull(user));
     }
 
-    public User updateStatus(Long id, boolean active) {
+    public User updateStatus(@NonNull Long id, boolean active) {
         User user = getUserById(id);
         user.setActive(active);
-        return userRepository.save(user);
+        return userRepository.save(java.util.Objects.requireNonNull(user));
     }
+
+
 }
