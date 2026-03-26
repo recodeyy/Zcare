@@ -35,7 +35,7 @@ public class AuthService {
                         throw new DataIntegrityViolationException("Email already exists");
                 }
 
-                var user = User.builder()
+                User user = User.builder()
                                 .username(request.getUsername())
                                 .password(passwordEncoder.encode(request.getPassword()))
                                 .fullName(request.getFullName())
@@ -44,8 +44,8 @@ public class AuthService {
                                 .active(true)
                                 .build();
 
-                var savedUser = java.util.Objects.requireNonNull(userRepository.save(user));
-                var jwtToken = jwtUtil.generateToken(savedUser);
+                User savedUser = java.util.Objects.requireNonNull(userRepository.save(user));
+                String jwtToken = jwtUtil.generateToken(savedUser);
 
                 return AuthResponse.builder()
                                 .token(jwtToken)
@@ -59,10 +59,10 @@ public class AuthService {
                                 new UsernamePasswordAuthenticationToken(
                                                 request.getUsername(),
                                                 request.getPassword()));
-                var user = userRepository.findByUsername(request.getUsername())
+                User user = userRepository.findByUsername(request.getUsername())
                                 .orElseThrow(() -> new RuntimeException("User not found after authentication"));
 
-                var jwtToken = jwtUtil.generateToken(user);
+                String jwtToken = jwtUtil.generateToken(user);
                 return AuthResponse.builder()
                                 .token(jwtToken)
                                 .username(user.getUsername())

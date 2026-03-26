@@ -1,21 +1,19 @@
 package com.pharmacy.service;
 
+import com.pharmacy.dto.MedicineRequest;
+import com.pharmacy.dto.MedicineResponse;
+import com.pharmacy.exception.ResourceNotFoundException;
 import com.pharmacy.model.Medicine;
 import com.pharmacy.repository.MedicineRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.lang.NonNull;
 import java.time.LocalDate;
-import java.util.Objects;
-
-
-
-
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,93 +22,107 @@ public class MedicineService {
 
     private final MedicineRepository medicineRepository;
 
-    public Page<Medicine> getAllMedicines(@NonNull Pageable pageable) {
-
-        log.debug("Fetching medicines: {}", pageable);
-        return medicineRepository.findAll(pageable);
+    public List<MedicineResponse> getAllMedicines() {
+        log.debug("Fetching all medicines");
+        return medicineRepository.findAll().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public Medicine getMedicineById(@NonNull Long id) {
-
-        return medicineRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Medicine not found with id: " + id));
+    public MedicineResponse getMedicineById(@NonNull Long id) {
+        Medicine medicine = medicineRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Medicine not found with id: " + id));
+        return toResponse(medicine);
     }
 
-    public Medicine addMedicine(@NonNull Medicine medicine) {
-        log.info("Adding new medicine: {} (Batch: {})", medicine.getName(), medicine.getBatchNumber());
-        if (medicineRepository.existsByBatchNumber(medicine.getBatchNumber())) {
-            throw new IllegalArgumentException("Batch number already exists: " + medicine.getBatchNumber());
-        }
-        return medicineRepository.save(Objects.requireNonNull(medicine));
+    public MedicineResponse addMedicine(@NonNull MedicineRequest request) {
+        log.info("Adding new medicine: {}", request.getName());
+        Medicine medicine = toEntity(request);
+        validateMedicine(medicine);
+        return toResponse(medicineRepository.save(medicine));
     }
 
     @Transactional
-    public Medicine updateMedicine(@NonNull Long id, @NonNull Medicine updated) {
+    public MedicineResponse updateMedicine(@NonNull Long id, @NonNull MedicineRequest request) {
         log.info("Updating medicine ID: {}", id);
-        Medicine existing = getMedicineById(id);
+        Medicine existing = medicineRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Medicine not found with id: " + id));
 
-
-        // Check if batch number is changing and if it conflicts with another record
-        if (updated.getBatchNumber() != null && !updated.getBatchNumber().equals(existing.getBatchNumber())) {
-            medicineRepository.findByBatchNumber(updated.getBatchNumber()).ifPresent(m -> {
-                if (!m.getId().equals(id)) {
-                    throw new IllegalArgumentException("Batch number " + updated.getBatchNumber() + " is already used by another medicine.");
-                }
-            });
-            existing.setBatchNumber(updated.getBatchNumber());
-        }
+        Medicine updated = toEntity(request);
+        validateMedicine(updated);
 
         existing.setName(updated.getName());
-        existing.setGenericName(updated.getGenericName());
         existing.setCategory(updated.getCategory());
         existing.setManufacturer(updated.getManufacturer());
         existing.setPrice(updated.getPrice());
         existing.setStockQuantity(updated.getStockQuantity());
         existing.setExpiryDate(updated.getExpiryDate());
-        existing.setDescription(updated.getDescription());
-        existing.setUnit(updated.getUnit());
 
-        return medicineRepository.save(existing);
+        return toResponse(medicineRepository.save(existing));
     }
 
     public void deleteMedicine(@NonNull Long id) {
         log.warn("Deleting medicine ID: {}", id);
-        getMedicineById(id); // Validate exists
+        if (!medicineRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Cannot delete. Medicine not found with id: " + id);
+        }
         medicineRepository.deleteById(id);
     }
 
-
-    public Page<Medicine> searchByName(String name, Pageable pageable) {
-        log.debug("Searching medicines by name: {} with {}", name, pageable);
-        return medicineRepository.findByNameContainingIgnoreCase(name, pageable);
+    public List<MedicineResponse> searchMedicines(String name) {
+        log.debug("Searching medicines by name: {}", name);
+        return medicineRepository.findByNameContainingIgnoreCase(name).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public Page<Medicine> getByCategory(String category, Pageable pageable) {
-        log.debug("Filtering medicines by category: {} with {}", category, pageable);
-        return medicineRepository.findByCategoryIgnoreCase(category, pageable);
+    public List<MedicineResponse> getLowStockMedicines(Integer threshold) {
+        log.debug("Fetching medicines with stock below {}", threshold);
+        return medicineRepository.findByStockQuantityLessThan(threshold).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public Page<Medicine> getExpiringSoon(int days, Pageable pageable) {
-        LocalDate cutoffDate = LocalDate.now().plusDays(days);
-        log.debug("Fetching expiring medicines (before {}) with {}", cutoffDate, pageable);
-        return medicineRepository.findExpiringSoon(cutoffDate, pageable);
+    public List<MedicineResponse> getExpiredMedicines() {
+        LocalDate today = LocalDate.now();
+        log.debug("Fetching medicines expired before {}", today);
+        return medicineRepository.findByExpiryDateBefore(today).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
-    public Page<Medicine> getLowStock(int threshold, Pageable pageable) {
-        log.debug("Fetching low-stock medicines (below {}) with {}", threshold, pageable);
-        return medicineRepository.findLowStock(threshold, pageable);
-    }
-
-    @Transactional
-    public Medicine adjustStock(@NonNull Long id, int quantity) {
-        log.info("Adjusting stock for ID {}: quantity flux {}", id, quantity);
-        Medicine medicine = getMedicineById(id);
-        int newQty = medicine.getStockQuantity() + quantity;
-        if (newQty < 0) {
-            throw new IllegalArgumentException("Insufficient stock. Available: " + medicine.getStockQuantity());
+    private void validateMedicine(Medicine medicine) {
+        if (medicine.getPrice() == null || medicine.getPrice() <= 0) {
+            throw new IllegalArgumentException("Price must be greater than 0");
         }
-        medicine.setStockQuantity(newQty);
-        return medicineRepository.save(Objects.requireNonNull(medicine));
+        if (medicine.getStockQuantity() == null || medicine.getStockQuantity() < 0) {
+            throw new IllegalArgumentException("Stock quantity must be greater than or equal to 0");
+        }
+        if (medicine.getExpiryDate() != null && medicine.getExpiryDate().isBefore(LocalDate.now())) {
+            log.warn("Warning: Medicine '{}' has an expiry date in the past: {}", medicine.getName(), medicine.getExpiryDate());
+        }
     }
 
+    private Medicine toEntity(MedicineRequest request) {
+        return Medicine.builder()
+                .name(request.getName())
+                .category(request.getCategory())
+                .price(request.getPrice())
+                .stockQuantity(request.getStockQuantity())
+                .expiryDate(request.getExpiryDate())
+                .manufacturer(request.getManufacturer())
+                .build();
+    }
+
+    private MedicineResponse toResponse(Medicine medicine) {
+        return MedicineResponse.builder()
+                .id(medicine.getId())
+                .name(medicine.getName())
+                .category(medicine.getCategory())
+                .price(medicine.getPrice())
+                .stockQuantity(medicine.getStockQuantity())
+                .expiryDate(medicine.getExpiryDate())
+                .manufacturer(medicine.getManufacturer())
+                .build();
+    }
 }
