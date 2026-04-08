@@ -9,6 +9,10 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -19,6 +23,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
 
     @Id
@@ -41,16 +46,16 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
+    @CreatedDate
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @LastModifiedDate
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
     @Builder.Default
     private boolean active = true;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 
     // Spring Security methods
     @Override
@@ -69,12 +74,12 @@ public class User implements UserDetails {
 
     @Override
     public String getPassword() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.password;
     }
 
     @Override
     public String getUsername() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.username;
     }
 
     public enum Role {

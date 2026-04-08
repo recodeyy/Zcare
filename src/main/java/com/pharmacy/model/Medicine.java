@@ -6,7 +6,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -25,38 +24,27 @@ public class Medicine {
     @Column(nullable = false)
     private String name;
 
-    private String genericName;
-
-    @Column(nullable = false)
     private String category;
 
-    private String manufacturer;
-
     @Column(nullable = false)
-    private String batchNumber;
-
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    private Double price;
 
     @Column(nullable = false)
     private Integer stockQuantity;
 
-    @Column(nullable = false)
     private LocalDate expiryDate;
 
-    private String description;
+    private String manufacturer;
 
-    private String unit; // e.g. "tablet", "ml", "capsule"
-
-    @Column(nullable = false, updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
     }
 
     @PreUpdate
