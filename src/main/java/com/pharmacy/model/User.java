@@ -92,6 +92,7 @@ public class User implements UserDetails {
 
     public enum Role {
         ADMIN,
-        PHARMACIST
+        PHARMACIST,
+        CUSTOMER
     }
 }
