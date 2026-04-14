@@ -1,0 +1,2731 @@
+Gmail	Vardan <vardan29see@gmail.com>
+springboot
+Vardan <vardan29see@gmail.com>	14 April 2026 at 18:52
+To: "os0106897@gmail.com" <os0106897@gmail.com>
+
+
+---------- Forwarded message ---------
+From: Vardan <vardan29see@gmail.com>
+Date: Tue, 14 Apr 2026 at 18:51
+Subject: Fwd: springboot
+To: os0106897@gmail.com <os0106897@gmail.com>
+
+
+
+
+---------- Forwarded message ---------
+From: Vardan <vardan29see@gmail.com>
+Date: Tue, 14 Apr 2026 at 18:18
+Subject: springboot
+To: os0106897@gmail.com <os0106897@gmail.com>
+
+
+# Pharmacy Management System - Comprehensive Analysis
+
+**Date:** April 14, 2026  
+**Project:** Zcare Pharmacy Backend  
+**Analysis Focus:** Production Readiness, Flutter Integration, Missing Features
+
+---
+
+## 📊 Executive Summary
+
+### ✅ What's Working Well
+- **Solid Foundation:** Well-structured Spring Boot 3 application with JWT authentication
+- **Basic CRUD:** Complete medicine inventory management
+- **Security:** Role-based access control (ADMIN, PHARMACIST, CUSTOMER)
+- **API Documentation:** Swagger UI integration for easy testing
+- **Database Flexibility:** Works with H2 (testing) and PostgreSQL (production)
+
+### ⚠️ Critical Gaps for Production Pharmacy System
+1. **No Barcode Support** - Essential for modern pharmacy operations
+2. **Limited Expiry Management** - Missing alerts and automated workflows
+3. **No Batch/Lot Tracking** - Required for regulatory compliance
+4. **Missing Prescription Management** - Core pharmacy feature absent
+5. **No Reporting/Analytics** - Sales, inventory, and compliance reports needed
+6. **Limited Stock Management** - No reorder points, suppliers, or purchase orders
+7. **No Customer Management** - Patient records and prescription history missing
+
+---
+
+## 🔍 Detailed Component Analysis
+
+### 1. Data Models (Entities)
+
+#### ✅ Current Models
+| Model | Status | Purpose |
+|-------|--------|---------|
+| `Medicine` | ✅ Basic | Stores medicine inventory |
+| `User` | ✅ Complete | Authentication & authorization |
+| `CustomerOrder` | ✅ Basic | Sales/billing records |
+| `OrderItem` | ✅ Basic | Order line items |
+
+#### ❌ Missing Critical Models
+
+**For Production Pharmacy:**
+```
+❌ Prescription - Doctor prescriptions
+❌ Customer/Patient - Patient records & history
+❌ Supplier - Vendor management
+❌ PurchaseOrder - Inventory procurement
+❌ Batch/Lot - Batch tracking for medicines
+❌ StockAdjustment - Audit trail for stock changes
+❌ PaymentTransaction - Payment processing
+❌ MedicineCategory - Proper categorization
+❌ Notification - Alerts for expiry, low stock
+```
+
+---
+
+### 2. Medicine Entity Analysis
+
+**Current Fields:**
+```java
+✅ id - Primary key
+✅ name - Medicine name
+✅ category - String (weak typing)
+✅ price - Double
+✅ stockQuantity - Integer
+✅ expiryDate - LocalDate
+✅ manufacturer - String
+✅ createdAt, updatedAt - Timestamps
+```
+
+**Missing Critical Fields:**
+```java
+❌ barcode - For scanning (EAN-13, UPC, etc.)
+❌ sku - Stock Keeping Unit
+❌ batchNumber - Batch/Lot number
+❌ manufactureDate - Manufacturing date
+❌ minStockLevel - Reorder point
+❌ maxStockLevel - Maximum stock threshold
+❌ unitOfMeasure - Tablets, ml, mg, etc.
+❌ dosageForm - Tablet, Syrup, Injection, etc.
+❌ strength - e.g., "500mg"
+❌ genericName - Generic drug name
+❌ brandName - Brand name
+❌ prescriptionRequired - Boolean flag
+❌ controlledSubstance - DEA schedule classification
+❌ storageConditions - Temperature, humidity requirements
+❌ rackLocation - Physical location in pharmacy
+❌ supplierInfo - Supplier reference
+❌ costPrice - Purchase price (for profit calculation)
+❌ sellingPrice - Retail price
+❌ taxRate - Tax percentage
+❌ imageUrl - Product image
+❌ activeIngredient - Chemical composition
+```
+
+---
+
+### 3. API Endpoints Analysis
+
+#### ✅ Implemented Endpoints
+
+**Authentication:**
+- `POST /api/auth/register` ✅
+- `POST /api/auth/login` ✅
+
+**Medicine Management:**
+- `GET /api/medicines` ✅ Get all
+- `GET /api/medicines/{id}` ✅ Get by ID
+- `POST /api/medicines` ✅ Add medicine
+- `PUT /api/medicines/{id}` ✅ Update medicine
+- `DELETE /api/medicines/{id}` ✅ Delete medicine
+- `GET /api/medicines/search?name=X` ✅ Search by name
+- `GET /api/medicines/low-stock?threshold=10` ✅ Low stock alert
+- `GET /api/medicines/expired` ✅ Expired medicines
+
+**Billing:**
+- `POST /api/orders` ✅ Create order
+
+#### ❌ Missing Critical Endpoints
+
+**Barcode Operations:**
+```
+❌ GET /api/medicines/barcode/{barcode} - Search by barcode
+❌ POST /api/medicines/scan - Barcode scanning endpoint
+❌ POST /api/medicines/bulk-scan - Batch barcode scanning
+```
+
+**Advanced Stock Management:**
+```
+❌ GET /api/medicines/expiring-soon?days=30 - Expiring within X days
+❌ GET /api/medicines/reorder-needed - Below reorder point
+❌ POST /api/medicines/{id}/adjust-stock - Stock adjustment with reason
+❌ GET /api/medicines/stock-history/{id} - Stock movement history
+❌ GET /api/medicines/by-category/{category} - Filter by category
+❌ GET /api/medicines/by-batch/{batchNumber} - Search by batch
+```
+
+**Prescription Management:**
+```
+❌ POST /api/prescriptions - Create prescription
+❌ GET /api/prescriptions/{id} - Get prescription
+❌ GET /api/prescriptions/patient/{patientId} - Patient prescriptions
+❌ PUT /api/prescriptions/{id}/dispense - Dispense medication
+```
+
+**Customer/Patient Management:**
+```
+❌ POST /api/customers - Register customer
+❌ GET /api/customers/{id} - Get customer details
+❌ GET /api/customers/{id}/history - Purchase history
+❌ GET /api/customers/{id}/prescriptions - Customer prescriptions
+```
+
+**Reporting & Analytics:**
+```
+❌ GET /api/reports/sales?from=X&to=Y - Sales report
+❌ GET /api/reports/inventory - Inventory valuation
+❌ GET /api/reports/expiry - Expiry report
+❌ GET /api/reports/top-selling - Best sellers
+❌ GET /api/reports/profit-loss - P&L statement
+```
+
+**Supplier & Purchase:**
+```
+❌ POST /api/suppliers - Add supplier
+❌ GET /api/suppliers - List suppliers
+❌ POST /api/purchase-orders - Create PO
+❌ GET /api/purchase-orders - List POs
+❌ PUT /api/purchase-orders/{id}/receive - Receive stock
+```
+
+---
+
+## 🔧 Flutter Integration Assessment
+
+### ✅ Flutter-Ready Features
+
+**Authentication:**
+```dart
+// Login works perfectly with Flutter
+final response = await http.post(
+  Uri.parse('http://your-api/api/auth/login'),
+  headers: {'Content-Type': 'application/json'},
+  body: jsonEncode({'username': 'admin', 'password': 'admin123'}),
+);
+// Returns JWT token for subsequent requests
+```
+
+**CORS Configuration:**
+- ✅ Already configured for `localhost:3000` and `localhost:5173`
+- ✅ Need to add your Flutter app's domain/IP
+
+**JSON Responses:**
+- ✅ All endpoints return clean JSON
+- ✅ DTOs are well-structured for Flutter models
+
+### ⚠️ Required Changes for Flutter
+
+**1. Update CORS for Mobile:**
+```properties
+# In application.properties
+cors.allowed-origins=http://localhost:3000,http://localhost:5173,http://10.0.2.2:8080,*
+```
+
+**2. Add Image Upload Support:**
+```java
+// Missing: File upload for medicine images
+@PostMapping("/{id}/image")
+public ResponseEntity<String> uploadImage(
+    @PathVariable Long id,
+    @RequestParam("file") MultipartFile file
+) {
+    // Upload to cloud storage (AWS S3, Cloudinary, etc.)
+}
+```
+
+**3. Add Pagination:**
+```java
+// Current: Returns all medicines (could be thousands)
+// Needed: Paginated responses
+@GetMapping
+public ResponseEntity<Page<MedicineResponse>> getAllMedicines(
+    @RequestParam(defaultValue = "0") int page,
+    @RequestParam(defaultValue = "20") int size
+) {
+    // Return paginated results
+}
+```
+
+**4. Add Filtering:**
+```java
+// For Flutter dropdown filters
+@GetMapping("/categories")
+public ResponseEntity<List<String>> getCategories() {
+    // Return unique categories
+}
+```
+
+---
+
+## 📱 Barcode Scanning Integration
+
+### Current Status: ❌ NOT IMPLEMENTED
+
+### What's Needed:
+
+#### 1. Update Medicine Model
+```java
+@Entity
+@Table(name = "medicines")
+public class Medicine {
+    // ... existing fields ...
+    
+    @Column(unique = true, length = 50)
+    private String barcode;  // EAN-13, UPC-A, Code-128
+    
+    @Column(length = 50)
+    private String sku;  // Internal SKU
+}
+```
+
+#### 2. Add Barcode Repository Method
+```java
+public interface MedicineRepository extends JpaRepository<Medicine, Long> {
+    // ... existing methods ...
+    
+    Optional<Medicine> findByBarcode(String barcode);
+    List<Medicine> findByBarcodeIn(List<String> barcodes);
+}
+```
+
+#### 3. Add Barcode Controller Endpoint
+```java
+@GetMapping("/barcode/{barcode}")
+@Operation(summary = "Search medicine by barcode")
+public ResponseEntity<MedicineResponse> getMedicineByBarcode(
+    @PathVariable String barcode
+) {
+    return ResponseEntity.ok(medicineService.getMedicineByBarcode(barcode));
+}
+```
+
+#### 4. Flutter Integration
+```dart
+// Use packages:
+// - mobile_scanner (for camera scanning)
+// - barcode_widget (for generating barcodes)
+
+import 'package:mobile_scanner/mobile_scanner.dart';
+
+class BarcodeScannerScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MobileScanner(
+      onDetect: (capture) {
+        final List<Barcode> barcodes = capture.barcodes;
+        for (final barcode in barcodes) {
+          // Call API with scanned barcode
+          fetchMedicineByBarcode(barcode.rawValue);
+        }
+      },
+    );
+  }
+  
+  Future<void> fetchMedicineByBarcode(String barcode) async {
+    final response = await http.get(
+      Uri.parse('http://your-api/api/medicines/barcode/$barcode'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
+    // Process response
+  }
+}
+```
+
+---
+
+## 🗄️ Database Compatibility
+
+### ✅ Currently Supports:
+- **H2** - In-memory (testing/development)
+- **PostgreSQL** - Production-ready
+
+### ✅ Can Easily Support:
+- **MySQL/MariaDB** - Just change driver and dialect
+- **Oracle** - Enterprise option
+- **SQL Server** - Microsoft ecosystem
+- **MongoDB** - Would require major refactoring (not recommended)
+
+### How to Switch Databases:
+
+#### MySQL Example:
+```xml
+<!-- pom.xml -->
+<dependency>
+    <groupId>com.mysql</groupId>
+    <artifactId>mysql-connector-j</artifactId>
+    <scope>runtime</scope>
+</dependency>
+```
+
+```properties
+# application.properties
+spring.datasource.url=jdbc:mysql://localhost:3306/zcare_db
+spring.datasource.username=root
+spring.datasource.password=password
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
+```
+
+#### Cloud Database Options:
+- **Supabase** (PostgreSQL) - Free tier available ✅
+- **AWS RDS** (PostgreSQL/MySQL) - Scalable ✅
+- **Google Cloud SQL** - Enterprise ✅
+- **Azure Database** - Microsoft ecosystem ✅
+- **PlanetScale** (MySQL) - Serverless ✅
+- **Neon** (PostgreSQL) - Serverless ✅
+
+---
+
+## 🚨 Critical Issues & Fixes
+
+### Issue 1: No Expiry Alert System
+
+**Problem:** Only shows expired medicines, no proactive alerts
+
+**Fix Required:**
+```java
+// Add to MedicineRepository
+@Query("SELECT m FROM Medicine m WHERE m.expiryDate BETWEEN :startDate AND :endDate")
+List<Medicine> findExpiringBetween(
+    @Param("startDate") LocalDate startDate, 
+    @Param("endDate") LocalDate endDate
+);
+
+// Add to MedicineController
+@GetMapping("/expiring-soon")
+@Operation(summary = "Get medicines expiring within specified days")
+public ResponseEntity<List<MedicineResponse>> getExpiringSoon(
+    @RequestParam(defaultValue = "30") Integer days
+) {
+    return ResponseEntity.ok(medicineService.getExpiringSoon(days));
+}
+
+// Add to MedicineService
+public List<MedicineResponse> getExpiringSoon(Integer days) {
+    LocalDate today = LocalDate.now();
+    LocalDate futureDate = today.plusDays(days);
+    return medicineRepository.findExpiringBetween(today, futureDate)
+        .stream()
+        .map(this::toResponse)
+        .collect(Collectors.toList());
+}
+```
+
+### Issue 2: No Stock Adjustment Audit Trail
+
+**Problem:** Stock changes have no history/reason tracking
+
+**Fix Required:**
+```java
+// Create new entity
+@Entity
+@Table(name = "stock_adjustments")
+public class StockAdjustment {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne
+    private Medicine medicine;
+    
+    private Integer previousQuantity;
+    private Integer newQuantity;
+    private Integer adjustmentAmount;
+    
+    @Enumerated(EnumType.STRING)
+    private AdjustmentType type; // SALE, PURCHASE, DAMAGE, EXPIRY, RETURN
+    
+    private String reason;
+    private String performedBy;
+    private LocalDateTime adjustmentDate;
+}
+
+// Add endpoint
+@PostMapping("/{id}/adjust-stock")
+@PreAuthorize("hasRole('PHARMACIST')")
+public ResponseEntity<MedicineResponse> adjustStock(
+    @PathVariable Long id,
+    @RequestBody StockAdjustmentRequest request,
+    Authentication auth
+) {
+    return ResponseEntity.ok(
+        medicineService.adjustStock(id, request, auth.getName())
+    );
+}
+```
+
+### Issue 3: No Batch/Lot Tracking
+
+**Problem:** Cannot track medicine batches (required for recalls)
+
+**Fix Required:**
+```java
+// Create Batch entity
+@Entity
+@Table(name = "medicine_batches")
+public class MedicineBatch {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne
+    private Medicine medicine;
+    
+    @Column(unique = true, nullable = false)
+    private String batchNumber;
+    
+    private LocalDate manufactureDate;
+    private LocalDate expiryDate;
+    private Integer quantity;
+    private Double costPrice;
+    
+    @ManyToOne
+    private Supplier supplier;
+}
+
+// Update Medicine to have batches
+@OneToMany(mappedBy = "medicine")
+private List<MedicineBatch> batches;
+```
+
+### Issue 4: No Prescription Management
+
+**Problem:** Core pharmacy feature missing
+
+**Fix Required:**
+```java
+// Create Prescription entity
+@Entity
+@Table(name = "prescriptions")
+public class Prescription {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne
+    private Customer patient;
+    
+    private String doctorName;
+    private String doctorLicense;
+    private LocalDate prescriptionDate;
+    private LocalDate validUntil;
+    
+    @OneToMany(mappedBy = "prescription")
+    private List<PrescriptionItem> items;
+    
+    @Enumerated(EnumType.STRING)
+    private PrescriptionStatus status; // PENDING, DISPENSED, EXPIRED
+    
+    private String notes;
+}
+
+// Create PrescriptionItem
+@Entity
+public class PrescriptionItem {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne
+    private Prescription prescription;
+    
+    @ManyToOne
+    private Medicine medicine;
+    
+    private Integer quantity;
+    private String dosageInstructions;
+    private Integer durationDays;
+}
+```
+
+### Issue 5: No Customer/Patient Records
+
+**Problem:** Cannot track patient history
+
+**Fix Required:**
+```java
+@Entity
+@Table(name = "customers")
+public class Customer {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    private String firstName;
+    private String lastName;
+    private String phone;
+    private String email;
+    private LocalDate dateOfBirth;
+    private String address;
+    
+    @OneToMany(mappedBy = "customer")
+    private List<Prescription> prescriptions;
+    
+    @OneToMany(mappedBy = "customer")
+    private List<CustomerOrder> orders;
+    
+    // Medical history
+    private String allergies;
+    private String chronicConditions;
+    private String insuranceInfo;
+}
+```
+
+---
+
+## 📋 Production Readiness Checklist
+
+### Security
+- ✅ JWT Authentication
+- ✅ Role-based access control
+- ✅ Password encryption (BCrypt)
+- ❌ API rate limiting
+- ❌ Input sanitization
+- ❌ SQL injection prevention (use parameterized queries)
+- ❌ HTTPS enforcement
+- ❌ Audit logging
+
+### Data Validation
+- ✅ Basic validation (@NotNull, @NotBlank)
+- ❌ Barcode format validation
+- ❌ Phone/email validation
+- ❌ Date range validation
+- ❌ Price range validation
+
+### Error Handling
+- ✅ Global exception handler
+- ✅ Custom exceptions
+- ❌ Detailed error messages for debugging
+- ❌ User-friendly error messages for production
+
+### Performance
+- ❌ Database indexing
+- ❌ Query optimization
+- ❌ Caching (Redis)
+- ❌ Pagination
+- ❌ Connection pooling (configured but not optimized)
+
+### Testing
+- ❌ Unit tests
+- ❌ Integration tests
+- ❌ API tests
+- ❌ Load testing
+
+### Documentation
+- ✅ Swagger/OpenAPI
+- ✅ README
+- ❌ API versioning
+- ❌ Deployment guide
+- ❌ User manual
+
+---
+
+## 🎯 Recommended Implementation Priority
+
+### Phase 1: Critical Features (Week 1-2)
+1. ✅ **Barcode Support** - Add barcode field and scanning endpoints
+2. ✅ **Expiry Alerts** - Implement expiring-soon endpoint with configurable days
+3. ✅ **Pagination** - Add pagination to all list endpoints
+4. ✅ **Stock Adjustment Audit** - Track all stock changes
+
+### Phase 2: Core Pharmacy Features (Week 3-4)
+1. ✅ **Customer Management** - Patient records and history
+2. ✅ **Prescription Management** - Digital prescriptions
+3. ✅ **Batch/Lot Tracking** - Regulatory compliance
+4. ✅ **Supplier Management** - Vendor tracking
+
+### Phase 3: Business Intelligence (Week 5-6)
+1. ✅ **Sales Reports** - Daily, weekly, monthly reports
+2. ✅ **Inventory Reports** - Stock valuation, turnover
+3. ✅ **Analytics Dashboard** - Key metrics and KPIs
+4. ✅ **Notifications** - Email/SMS alerts for expiry, low stock
+
+### Phase 4: Advanced Features (Week 7-8)
+1. ✅ **Purchase Orders** - Automated procurement
+2. ✅ **Multi-location Support** - Multiple pharmacy branches
+3. ✅ **Insurance Integration** - Insurance claim processing
+4. ✅ **Mobile App Optimization** - Flutter-specific endpoints
+
+---
+
+## 🔌 Flutter Integration Guide
+
+### 1. Setup HTTP Client
+```dart
+// lib/services/api_service.dart
+class ApiService {
+  static const String baseUrl = 'http://your-api-url:8080/api';
+  final String? token;
+  
+  ApiService({this.token});
+  
+  Map<String, String> get headers => {
+    'Content-Type': 'application/json',
+    if (token != null) 'Authorization': 'Bearer $token',
+  };
+}
+```
+
+### 2. Create Models
+```dart
+// lib/models/medicine.dart
+class Medicine {
+  final int id;
+  final String name;
+  final String? category;
+  final double price;
+  final int stockQuantity;
+  final DateTime? expiryDate;
+  final String? manufacturer;
+  
+  Medicine.fromJson(Map<String, dynamic> json)
+    : id = json['id'],
+      name = json['name'],
+      category = json['category'],
+      price = json['price'].toDouble(),
+      stockQuantity = json['stockQuantity'],
+      expiryDate = json['expiryDate'] != null 
+        ? DateTime.parse(json['expiryDate']) 
+        : null,
+      manufacturer = json['manufacturer'];
+}
+```
+
+### 3. API Calls
+```dart
+// lib/services/medicine_service.dart
+class MedicineService {
+  final ApiService _api;
+  
+  MedicineService(this._api);
+  
+  Future<List<Medicine>> getAllMedicines() async {
+    final response = await http.get(
+      Uri.parse('${ApiService.baseUrl}/medicines'),
+      headers: _api.headers,
+    );
+    
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Medicine.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load medicines');
+    }
+  }
+  
+  Future<Medicine?> scanBarcode(String barcode) async {
+    final response = await http.get(
+      Uri.parse('${ApiService.baseUrl}/medicines/barcode/$barcode'),
+      headers: _api.headers,
+    );
+    
+    if (response.statusCode == 200) {
+      return Medicine.fromJson(jsonDecode(response.body));
+    }
+    return null;
+  }
+}
+```
+
+### 4. State Management (Provider Example)
+```dart
+// lib/providers/medicine_provider.dart
+class MedicineProvider extends ChangeNotifier {
+  final MedicineService _service;
+  List<Medicine> _medicines = [];
+  bool _loading = false;
+  
+  List<Medicine> get medicines => _medicines;
+  bool get loading => _loading;
+  
+  Future<void> fetchMedicines() async {
+    _loading = true;
+    notifyListeners();
+    
+    try {
+      _medicines = await _service.getAllMedicines();
+    } catch (e) {
+      // Handle error
+    } finally {
+      _loading = false;
+      notifyListeners();
+    }
+  }
+}
+```
+
+---
+
+## 💡 Recommendations
+
+### Immediate Actions:
+1. **Add Barcode Field** - Update Medicine entity and add barcode scanning endpoint
+2. **Implement Pagination** - Prevent performance issues with large datasets
+3. **Add Expiry Alerts** - Implement expiring-soon with configurable days
+4. **Create Customer Entity** - Essential for prescription tracking
+
+### Short-term (1-2 months):
+1. **Prescription Management** - Core pharmacy feature
+2. **Batch Tracking** - Regulatory requirement
+3. **Reporting Module** - Business intelligence
+4. **Mobile Optimization** - Image upload, better filtering
+
+### Long-term (3-6 months):
+1. **Multi-location Support** - Scale to multiple branches
+2. **Insurance Integration** - Automated claims
+3. **Inventory Forecasting** - AI-based stock prediction
+4. **Supplier Portal** - B2B integration
+
+---
+
+## ✅ Conclusion
+
+**Current State:** Basic pharmacy inventory system suitable for learning and small-scale testing.
+
+**Production Ready:** ❌ NO - Missing critical features for real pharmacy operations.
+
+**Flutter Compatible:** ✅ YES - API structure is mobile-friendly, just needs enhancements.
+
+**Database Flexible:** ✅ YES - Can work with any SQL database (PostgreSQL, MySQL, etc.).
+
+**Next Steps:**
+1. Implement barcode support (highest priority)
+2. Add customer/patient management
+3. Build prescription module
+4. Enhance expiry tracking with alerts
+5. Add comprehensive reporting
+
+**Estimated Development Time:**
+- Basic barcode + expiry alerts: 1-2 weeks
+- Full production features: 2-3 months
+- Enterprise-grade system: 6+ months
+
+---
+
+## 📞 Support & Resources
+
+**Documentation:**
+- Spring Boot: https://spring.io/projects/spring-boot
+- Flutter HTTP: https://pub.dev/packages/http
+- Mobile Scanner: https://pub.dev/packages/mobile_scanner
+
+**Database Options:**
+- Supabase (Free PostgreSQL): https://supabase.com
+- PlanetScale (Free MySQL): https://planetscale.com
+- Neon (Serverless PostgreSQL): https://neon.tech
+
+**Deployment:**
+- Railway: https://railway.app
+- Render: https://render.com
+- Fly.io: https://fly.io
+
+
+
+
+plan
+ # 🗺️ Pharmacy Management System - Detailed Implementation Roadmap
+
+**Project:** Zcare Pharmacy Backend Enhancement  
+**Timeline:** 12 Weeks (3 Months)  
+**Goal:** Transform basic inventory system into production-ready pharmacy management platform
+
+---
+
+## 📋 Table of Contents
+1. [Overview](#overview)
+2. [Phase 1: Critical Features (Weeks 1-3)](#phase-1-critical-features)
+3. [Phase 2: Core Pharmacy Features (Weeks 4-6)](#phase-2-core-pharmacy-features)
+4. [Phase 3: Business Intelligence (Weeks 7-9)](#phase-3-business-intelligence)
+5. [Phase 4: Advanced Features (Weeks 10-12)](#phase-4-advanced-features)
+6. [Testing Strategy](#testing-strategy)
+7. [Deployment Plan](#deployment-plan)
+8. [Flutter Integration Timeline](#flutter-integration-timeline)
+
+---
+
+## 🎯 Overview
+
+### Current State
+- ✅ Basic medicine CRUD operations
+- ✅ Simple order/billing system
+- ✅ JWT authentication
+- ✅ Role-based access control
+
+### Target State
+- ✅ Full barcode scanning support
+- ✅ Prescription management
+- ✅ Customer/Patient records
+- ✅ Batch/Lot tracking
+- ✅ Comprehensive reporting
+- ✅ Stock management with audit trails
+- ✅ Expiry alerts and notifications
+- ✅ Flutter mobile app integration
+
+### Resource Requirements
+- **Backend Developer:** 1 person (full-time)
+- **Database:** PostgreSQL or MySQL
+- **Testing:** Manual + Automated
+- **Deployment:** Railway/Render/AWS
+
+---
+
+# Phase 1: Critical Features (Weeks 1-3)
+
+## Week 1: Barcode Support & Database Enhancement
+
+### Day 1-2: Database Schema Updates
+
+#### Task 1.1: Update Medicine Entity
+**File:** `src/main/java/com/pharmacy/model/Medicine.java`
+
+**Changes:**
+```java
+@Entity
+@Table(name = "medicines", indexes = {
+    @Index(name = "idx_barcode", columnList = "barcode"),
+    @Index(name = "idx_name", columnList = "name"),
+    @Index(name = "idx_category", columnList = "category"),
+    @Index(name = "idx_expiry_date", columnList = "expiryDate")
+})
+public class Medicine {
+    // Existing fields...
+    
+    // NEW FIELDS - Add these
+    @Column(unique = true, length = 50)
+    private String barcode;  // EAN-13, UPC-A, Code-128
+    
+    @Column(length = 50)
+    private String sku;  // Internal Stock Keeping Unit
+    
+    @Column(length = 100)
+    private String batchNumber;  // Current batch number
+    
+    private LocalDate manufactureDate;
+    
+    @Column(length = 50)
+    private String dosageForm;  // Tablet, Capsule, Syrup, Injection, etc.
+    
+    @Column(length = 50)
+    private String strength;  // e.g., "500mg", "10ml"
+    
+    @Column(length = 200)
+    private String genericName;
+    
+    @Column(length = 200)
+    private String brandName;
+    
+    private Boolean prescriptionRequired = false;
+    
+    private Integer minStockLevel = 10;  // Reorder point
+    
+    private Integer maxStockLevel = 1000;
+    
+    @Column(length = 50)
+    private String unitOfMeasure;  // Tablets, ml, mg, etc.
+    
+    @Column(length = 200)
+    private String rackLocation;  // Physical location in pharmacy
+    
+    private Double costPrice;  // Purchase price
+    
+    private Double sellingPrice;  // Retail price (rename from 'price')
+    
+    private Double taxRate = 0.0;  // Tax percentage
+    
+    @Column(length = 500)
+    private String imageUrl;
+    
+    @Column(length = 500)
+    private String activeIngredient;
+    
+    @Column(length = 500)
+    private String storageConditions;
+    
+    private Boolean isActive = true;  // Soft delete flag
+}
+```
+
+**SQL Migration Script:**
+```sql
+-- Create migration file: V2__add_medicine_fields.sql
+ALTER TABLE medicines ADD COLUMN barcode VARCHAR(50) UNIQUE;
+ALTER TABLE medicines ADD COLUMN sku VARCHAR(50);
+ALTER TABLE medicines ADD COLUMN batch_number VARCHAR(100);
+ALTER TABLE medicines ADD COLUMN manufacture_date DATE;
+ALTER TABLE medicines ADD COLUMN dosage_form VARCHAR(50);
+ALTER TABLE medicines ADD COLUMN strength VARCHAR(50);
+ALTER TABLE medicines ADD COLUMN generic_name VARCHAR(200);
+ALTER TABLE medicines ADD COLUMN brand_name VARCHAR(200);
+ALTER TABLE medicines ADD COLUMN prescription_required BOOLEAN DEFAULT FALSE;
+ALTER TABLE medicines ADD COLUMN min_stock_level INTEGER DEFAULT 10;
+ALTER TABLE medicines ADD COLUMN max_stock_level INTEGER DEFAULT 1000;
+ALTER TABLE medicines ADD COLUMN unit_of_measure VARCHAR(50);
+ALTER TABLE medicines ADD COLUMN rack_location VARCHAR(200);
+ALTER TABLE medicines ADD COLUMN cost_price DOUBLE PRECISION;
+ALTER TABLE medicines ADD COLUMN selling_price DOUBLE PRECISION;
+ALTER TABLE medicines ADD COLUMN tax_rate DOUBLE PRECISION DEFAULT 0.0;
+ALTER TABLE medicines ADD COLUMN image_url VARCHAR(500);
+ALTER TABLE medicines ADD COLUMN active_ingredient VARCHAR(500);
+ALTER TABLE medicines ADD COLUMN storage_conditions VARCHAR(500);
+ALTER TABLE medicines ADD COLUMN is_active BOOLEAN DEFAULT TRUE;
+
+-- Create indexes for performance
+CREATE INDEX idx_barcode ON medicines(barcode);
+CREATE INDEX idx_name ON medicines(name);
+CREATE INDEX idx_category ON medicines(category);
+CREATE INDEX idx_expiry_date ON medicines(expiry_date);
+CREATE INDEX idx_batch_number ON medicines(batch_number);
+```
+
+**Estimated Time:** 4 hours
+
+---
+
+#### Task 1.2: Update MedicineRequest DTO
+**File:** `src/main/java/com/pharmacy/dto/MedicineRequest.java`
+
+```java
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class MedicineRequest {
+    @NotBlank(message = "Medicine name is required")
+    private String name;
+    
+    private String category;
+    
+    @NotNull(message = "Selling price is required")
+    @Positive(message = "Selling price must be positive")
+    private Double sellingPrice;
+    
+    @Positive(message = "Cost price must be positive")
+    private Double costPrice;
+    
+    @NotNull(message = "Stock quantity is required")
+    @Min(value = 0, message = "Stock quantity cannot be negative")
+    private Integer stockQuantity;
+    
+    @FutureOrPresent(message = "Expiry date cannot be in the past")
+    private LocalDate expiryDate;
+    
+    private String manufacturer;
+    
+    // NEW FIELDS
+    @Pattern(regexp = "^[0-9]{8,13}$", message = "Invalid barcode format")
+    private String barcode;
+    
+    private String sku;
+    private String batchNumber;
+    private LocalDate manufactureDate;
+    private String dosageForm;
+    private String strength;
+    private String genericName;
+    private String brandName;
+    private Boolean prescriptionRequired;
+    
+    @Min(value = 0, message = "Min stock level cannot be negative")
+    private Integer minStockLevel;
+    
+    @Min(value = 1, message = "Max stock level must be at least 1")
+    private Integer maxStockLevel;
+    
+    private String unitOfMeasure;
+    private String rackLocation;
+    private Double taxRate;
+    private String imageUrl;
+    private String activeIngredient;
+    private String storageConditions;
+}
+```
+
+**Estimated Time:** 2 hours
+
+---
+
+#### Task 1.3: Update MedicineResponse DTO
+**File:** `src/main/java/com/pharmacy/dto/MedicineResponse.java`
+
+```java
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class MedicineResponse {
+    private Long id;
+    private String name;
+    private String category;
+    private Double sellingPrice;
+    private Double costPrice;
+    private Integer stockQuantity;
+    private LocalDate expiryDate;
+    private String manufacturer;
+    
+    // NEW FIELDS
+    private String barcode;
+    private String sku;
+    private String batchNumber;
+    private LocalDate manufactureDate;
+    private String dosageForm;
+    private String strength;
+    private String genericName;
+    private String brandName;
+    private Boolean prescriptionRequired;
+    private Integer minStockLevel;
+    private Integer maxStockLevel;
+    private String unitOfMeasure;
+    private String rackLocation;
+    private Double taxRate;
+    private String imageUrl;
+    private String activeIngredient;
+    private String storageConditions;
+    private Boolean isActive;
+    
+    // COMPUTED FIELDS
+    private Boolean isLowStock;  // stockQuantity < minStockLevel
+    private Boolean isExpiringSoon;  // expiry within 30 days
+    private Boolean isExpired;  // expiry date passed
+    private Integer daysUntilExpiry;
+    private Double profitMargin;  // (sellingPrice - costPrice) / costPrice * 100
+}
+```
+
+**Estimated Time:** 1 hour
+
+---
+
+### Day 3-4: Repository & Service Layer Updates
+
+#### Task 1.4: Update MedicineRepository
+**File:** `src/main/java/com/pharmacy/repository/MedicineRepository.java`
+
+```java
+@Repository
+public interface MedicineRepository extends JpaRepository<Medicine, Long> {
+    
+    // EXISTING METHODS
+    List<Medicine> findByStockQuantityLessThan(Integer quantity);
+    List<Medicine> findByExpiryDateBefore(LocalDate date);
+    List<Medicine> findByNameContainingIgnoreCase(String name);
+    
+    // NEW BARCODE METHODS
+    Optional<Medicine> findByBarcode(String barcode);
+    List<Medicine> findByBarcodeIn(List<String> barcodes);
+    boolean existsByBarcode(String barcode);
+    
+    // NEW SEARCH METHODS
+    List<Medicine> findByCategory(String category);
+    List<Medicine> findByCategoryIgnoreCase(String category);
+    List<Medicine> findByGenericNameContainingIgnoreCase(String genericName);
+    List<Medicine> findByBrandNameContainingIgnoreCase(String brandName);
+    List<Medicine> findByManufacturerContainingIgnoreCase(String manufacturer);
+    List<Medicine> findByBatchNumber(String batchNumber);
+    List<Medicine> findBySku(String sku);
+    
+    // STOCK MANAGEMENT
+    List<Medicine> findByStockQuantityLessThanAndIsActiveTrue(Integer threshold);
+    
+    @Query("SELECT m FROM Medicine m WHERE m.stockQuantity < m.minStockLevel AND m.isActive = true")
+    List<Medicine> findBelowReorderPoint();
+    
+    @Query("SELECT m FROM Medicine m WHERE m.stockQuantity > m.maxStockLevel AND m.isActive = true")
+    List<Medicine> findOverstocked();
+    
+    // EXPIRY MANAGEMENT
+    @Query("SELECT m FROM Medicine m WHERE m.expiryDate BETWEEN :startDate AND :endDate AND m.isActive = true")
+    List<Medicine> findExpiringBetween(
+        @Param("startDate") LocalDate startDate, 
+        @Param("endDate") LocalDate endDate
+    );
+    
+    @Query("SELECT m FROM Medicine m WHERE m.expiryDate < :date AND m.isActive = true")
+    List<Medicine> findExpiredMedicines(@Param("date") LocalDate date);
+    
+    // PRESCRIPTION REQUIRED
+    List<Medicine> findByPrescriptionRequiredAndIsActiveTrue(Boolean required);
+    
+    // ACTIVE/INACTIVE
+    List<Medicine> findByIsActiveTrue();
+    List<Medicine> findByIsActiveFalse();
+    
+    // CATEGORY STATISTICS
+    @Query("SELECT m.category, COUNT(m) FROM Medicine m WHERE m.isActive = true GROUP BY m.category")
+    List<Object[]> countByCategory();
+    
+    @Query("SELECT DISTINCT m.category FROM Medicine m WHERE m.isActive = true ORDER BY m.category")
+    List<String> findAllCategories();
+}
+```
+
+**Estimated Time:** 3 hours
+
+---
+
+#### Task 1.5: Update MedicineService
+**File:** `src/main/java/com/pharmacy/service/MedicineService.java`
+
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class MedicineService {
+
+    private final MedicineRepository medicineRepository;
+
+    // EXISTING METHODS (update to use new fields)
+    
+    // NEW BARCODE METHODS
+    public MedicineResponse getMedicineByBarcode(String barcode) {
+        log.debug("Fetching medicine by barcode: {}", barcode);
+        Medicine medicine = medicineRepository.findByBarcode(barcode)
+            .orElseThrow(() -> new ResourceNotFoundException(
+                "Medicine not found with barcode: " + barcode));
+        return toResponse(medicine);
+    }
+    
+    public List<MedicineResponse> getMedicinesByBarcodes(List<String> barcodes) {
+        log.debug("Fetching medicines by barcodes: {}", barcodes);
+        return medicineRepository.findByBarcodeIn(barcodes).stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    public boolean barcodeExists(String barcode) {
+        return medicineRepository.existsByBarcode(barcode);
+    }
+    
+    // ENHANCED SEARCH METHODS
+    public List<MedicineResponse> searchByGenericName(String genericName) {
+        return medicineRepository.findByGenericNameContainingIgnoreCase(genericName)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    public List<MedicineResponse> searchByBrandName(String brandName) {
+        return medicineRepository.findByBrandNameContainingIgnoreCase(brandName)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    public List<MedicineResponse> getByCategory(String category) {
+        return medicineRepository.findByCategoryIgnoreCase(category)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    public List<String> getAllCategories() {
+        return medicineRepository.findAllCategories();
+    }
+    
+    // ENHANCED STOCK MANAGEMENT
+    public List<MedicineResponse> getBelowReorderPoint() {
+        log.debug("Fetching medicines below reorder point");
+        return medicineRepository.findBelowReorderPoint()
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    public List<MedicineResponse> getOverstocked() {
+        log.debug("Fetching overstocked medicines");
+        return medicineRepository.findOverstocked()
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    // ENHANCED EXPIRY MANAGEMENT
+    public List<MedicineResponse> getExpiringSoon(Integer days) {
+        LocalDate today = LocalDate.now();
+        LocalDate futureDate = today.plusDays(days);
+        log.debug("Fetching medicines expiring between {} and {}", today, futureDate);
+        return medicineRepository.findExpiringBetween(today, futureDate)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    public List<MedicineResponse> getExpiredMedicines() {
+        LocalDate today = LocalDate.now();
+        return medicineRepository.findExpiredMedicines(today)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    // PRESCRIPTION REQUIRED
+    public List<MedicineResponse> getPrescriptionRequired() {
+        return medicineRepository.findByPrescriptionRequiredAndIsActiveTrue(true)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    // SOFT DELETE
+    @Transactional
+    public void deactivateMedicine(Long id) {
+        Medicine medicine = medicineRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Medicine not found"));
+        medicine.setIsActive(false);
+        medicineRepository.save(medicine);
+        log.info("Deactivated medicine: {}", medicine.getName());
+    }
+    
+    @Transactional
+    public void reactivateMedicine(Long id) {
+        Medicine medicine = medicineRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Medicine not found"));
+        medicine.setIsActive(true);
+        medicineRepository.save(medicine);
+        log.info("Reactivated medicine: {}", medicine.getName());
+    }
+    
+    // ENHANCED VALIDATION
+    private void validateMedicine(Medicine medicine) {
+        // Existing validations...
+        
+        // NEW VALIDATIONS
+        if (medicine.getBarcode() != null && !medicine.getBarcode().isEmpty()) {
+            if (!medicine.getBarcode().matches("^[0-9]{8,13}$")) {
+                throw new IllegalArgumentException("Invalid barcode format");
+            }
+        }
+        
+        if (medicine.getMinStockLevel() != null && medicine.getMaxStockLevel() != null) {
+            if (medicine.getMinStockLevel() >= medicine.getMaxStockLevel()) {
+                throw new IllegalArgumentException("Min stock level must be less than max stock level");
+            }
+        }
+        
+        if (medicine.getCostPrice() != null && medicine.getSellingPrice() != null) {
+            if (medicine.getCostPrice() > medicine.getSellingPrice()) {
+                log.warn("Cost price is higher than selling price for: {}", medicine.getName());
+            }
+        }
+        
+        if (medicine.getManufactureDate() != null && medicine.getExpiryDate() != null) {
+            if (medicine.getManufactureDate().isAfter(medicine.getExpiryDate())) {
+                throw new IllegalArgumentException("Manufacture date cannot be after expiry date");
+            }
+        }
+    }
+    
+    // ENHANCED RESPONSE MAPPING
+    private MedicineResponse toResponse(Medicine medicine) {
+        LocalDate today = LocalDate.now();
+        Integer daysUntilExpiry = null;
+        Boolean isExpired = false;
+        Boolean isExpiringSoon = false;
+        
+        if (medicine.getExpiryDate() != null) {
+            daysUntilExpiry = (int) ChronoUnit.DAYS.between(today, medicine.getExpiryDate());
+            isExpired = medicine.getExpiryDate().isBefore(today);
+            isExpiringSoon = daysUntilExpiry <= 30 && daysUntilExpiry > 0;
+        }
+        
+        Boolean isLowStock = medicine.getStockQuantity() < medicine.getMinStockLevel();
+        
+        Double profitMargin = null;
+        if (medicine.getCostPrice() != null && medicine.getSellingPrice() != null && medicine.getCostPrice() > 0) {
+            profitMargin = ((medicine.getSellingPrice() - medicine.getCostPrice()) / medicine.getCostPrice()) * 100;
+        }
+        
+        return MedicineResponse.builder()
+            .id(medicine.getId())
+            .name(medicine.getName())
+            .category(medicine.getCategory())
+            .sellingPrice(medicine.getSellingPrice())
+            .costPrice(medicine.getCostPrice())
+            .stockQuantity(medicine.getStockQuantity())
+            .expiryDate(medicine.getExpiryDate())
+            .manufacturer(medicine.getManufacturer())
+            .barcode(medicine.getBarcode())
+            .sku(medicine.getSku())
+            .batchNumber(medicine.getBatchNumber())
+            .manufactureDate(medicine.getManufactureDate())
+            .dosageForm(medicine.getDosageForm())
+            .strength(medicine.getStrength())
+            .genericName(medicine.getGenericName())
+            .brandName(medicine.getBrandName())
+            .prescriptionRequired(medicine.getPrescriptionRequired())
+            .minStockLevel(medicine.getMinStockLevel())
+            .maxStockLevel(medicine.getMaxStockLevel())
+            .unitOfMeasure(medicine.getUnitOfMeasure())
+            .rackLocation(medicine.getRackLocation())
+            .taxRate(medicine.getTaxRate())
+            .imageUrl(medicine.getImageUrl())
+            .activeIngredient(medicine.getActiveIngredient())
+            .storageConditions(medicine.getStorageConditions())
+            .isActive(medicine.getIsActive())
+            .isLowStock(isLowStock)
+            .isExpiringSoon(isExpiringSoon)
+            .isExpired(isExpired)
+            .daysUntilExpiry(daysUntilExpiry)
+            .profitMargin(profitMargin)
+            .build();
+    }
+}
+```
+
+**Estimated Time:** 6 hours
+
+---
+
+### Day 5: Controller Updates
+
+#### Task 1.6: Update MedicineController
+**File:** `src/main/java/com/pharmacy/controller/MedicineController.java`
+
+```java
+@RestController
+@RequestMapping("/api/medicines")
+@RequiredArgsConstructor
+@Tag(name = "Medicine Inventory", description = "Manage medicine stock and inventory")
+@SecurityRequirement(name = "bearerAuth")
+public class MedicineController {
+
+    private final MedicineService medicineService;
+
+    // EXISTING ENDPOINTS (keep all)
+    
+    // NEW BARCODE ENDPOINTS
+    @GetMapping("/barcode/{barcode}")
+    @Operation(summary = "Get medicine by barcode", description = "Search medicine using barcode scanner")
+    public ResponseEntity<MedicineResponse> getMedicineByBarcode(
+            @Parameter(description = "Barcode (EAN-13, UPC-A, etc.)") 
+            @PathVariable String barcode) {
+        return ResponseEntity.ok(medicineService.getMedicineByBarcode(barcode));
+    }
+    
+    @PostMapping("/barcode/batch")
+    @Operation(summary = "Get multiple medicines by barcodes")
+    public ResponseEntity<List<MedicineResponse>> getMedicinesByBarcodes(
+            @RequestBody List<String> barcodes) {
+        return ResponseEntity.ok(medicineService.getMedicinesByBarcodes(barcodes));
+    }
+    
+    @GetMapping("/barcode/exists/{barcode}")
+    @Operation(summary = "Check if barcode exists")
+    public ResponseEntity<Boolean> barcodeExists(@PathVariable String barcode) {
+        return ResponseEntity.ok(medicineService.barcodeExists(barcode));
+    }
+    
+    // ENHANCED SEARCH ENDPOINTS
+    @GetMapping("/search/generic")
+    @Operation(summary = "Search by generic name")
+    public ResponseEntity<List<MedicineResponse>> searchByGenericName(
+            @RequestParam String name) {
+        return ResponseEntity.ok(medicineService.searchByGenericName(name));
+    }
+    
+    @GetMapping("/search/brand")
+    @Operation(summary = "Search by brand name")
+    public ResponseEntity<List<MedicineResponse>> searchByBrandName(
+            @RequestParam String name) {
+        return ResponseEntity.ok(medicineService.searchByBrandName(name));
+    }
+    
+    @GetMapping("/category/{category}")
+    @Operation(summary = "Get medicines by category")
+    public ResponseEntity<List<MedicineResponse>> getByCategory(
+            @PathVariable String category) {
+        return ResponseEntity.ok(medicineService.getByCategory(category));
+    }
+    
+    @GetMapping("/categories")
+    @Operation(summary = "Get all categories")
+    public ResponseEntity<List<String>> getAllCategories() {
+        return ResponseEntity.ok(medicineService.getAllCategories());
+    }
+    
+    // ENHANCED STOCK MANAGEMENT
+    @GetMapping("/reorder-needed")
+    @Operation(summary = "Get medicines below reorder point")
+    public ResponseEntity<List<MedicineResponse>> getBelowReorderPoint() {
+        return ResponseEntity.ok(medicineService.getBelowReorderPoint());
+    }
+    
+    @GetMapping("/overstocked")
+    @Operation(summary = "Get overstocked medicines")
+    public ResponseEntity<List<MedicineResponse>> getOverstocked() {
+        return ResponseEntity.ok(medicineService.getOverstocked());
+    }
+    
+    // ENHANCED EXPIRY MANAGEMENT
+    @GetMapping("/expiring-soon")
+    @Operation(summary = "Get medicines expiring within specified days")
+    public ResponseEntity<List<MedicineResponse>> getExpiringSoon(
+            @RequestParam(defaultValue = "30") Integer days) {
+        return ResponseEntity.ok(medicineService.getExpiringSoon(days));
+    }
+    
+    // PRESCRIPTION REQUIRED
+    @GetMapping("/prescription-required")
+    @Operation(summary = "Get prescription-required medicines")
+    public ResponseEntity<List<MedicineResponse>> getPrescriptionRequired() {
+        return ResponseEntity.ok(medicineService.getPrescriptionRequired());
+    }
+    
+    // SOFT DELETE
+    @PatchMapping("/{id}/deactivate")
+    @Operation(summary = "Deactivate medicine (soft delete)")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deactivateMedicine(@PathVariable Long id) {
+        medicineService.deactivateMedicine(id);
+        return ResponseEntity.noContent().build();
+    }
+    
+    @PatchMapping("/{id}/reactivate")
+    @Operation(summary = "Reactivate medicine")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> reactivateMedicine(@PathVariable Long id) {
+        medicineService.reactivateMedicine(id);
+        return ResponseEntity.noContent().build();
+    }
+}
+```
+
+**Estimated Time:** 4 hours
+
+---
+
+## Week 2: Pagination, Image Upload & Stock Audit
+
+### Day 6-7: Pagination Implementation
+
+#### Task 2.1: Add Pagination to Medicine Endpoints
+
+**Update MedicineController:**
+```java
+@GetMapping
+@Operation(summary = "Get all medicines with pagination")
+public ResponseEntity<Page<MedicineResponse>> getAllMedicines(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
+        @RequestParam(defaultValue = "name") String sortBy,
+        @RequestParam(defaultValue = "ASC") String sortDirection) {
+    return ResponseEntity.ok(medicineService.getAllMedicinesPaginated(page, size, sortBy, sortDirection));
+}
+```
+
+**Update MedicineService:**
+```java
+public Page<MedicineResponse> getAllMedicinesPaginated(int page, int size, String sortBy, String sortDirection) {
+    Sort sort = sortDirection.equalsIgnoreCase("DESC") 
+        ? Sort.by(sortBy).descending() 
+        : Sort.by(sortBy).ascending();
+    
+    Pageable pageable = PageRequest.of(page, size, sort);
+    Page<Medicine> medicinePage = medicineRepository.findAll(pageable);
+    
+    return medicinePage.map(this::toResponse);
+}
+```
+
+**Estimated Time:** 4 hours
+
+---
+
+#### Task 2.2: Image Upload Support
+
+**Add Dependency to pom.xml:**
+```xml
+<!-- File Upload -->
+<dependency>
+    <groupId>commons-fileupload</groupId>
+    <artifactId>commons-fileupload</artifactId>
+    <version>1.5</version>
+</dependency>
+```
+
+**Create ImageUploadService:**
+```java
+@Service
+@Slf4j
+public class ImageUploadService {
+    
+    @Value("${file.upload.dir:uploads/medicines}")
+    private String uploadDir;
+    
+    public String uploadImage(MultipartFile file, Long medicineId) throws IOException {
+        // Validate file
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
+        
+        String contentType = file.getContentType();
+        if (!contentType.startsWith("image/")) {
+            throw new IllegalArgumentException("Only image files are allowed");
+        }
+        
+        // Create upload directory if not exists
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        
+        // Generate unique filename
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String filename = "medicine_" + medicineId + "_" + System.currentTimeMillis() + extension;
+        
+        // Save file
+        Path filePath = uploadPath.resolve(filename);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        
+        log.info("Uploaded image: {}", filename);
+        return "/uploads/medicines/" + filename;
+    }
+    
+    public void deleteImage(String imageUrl) {
+        try {
+            Path filePath = Paths.get(uploadDir, imageUrl.substring(imageUrl.lastIndexOf("/") + 1));
+            Files.deleteIfExists(filePath);
+            log.info("Deleted image: {}", imageUrl);
+        } catch (IOException e) {
+            log.error("Failed to delete image: {}", imageUrl, e);
+        }
+    }
+}
+```
+
+**Add Controller Endpoint:**
+```java
+@PostMapping("/{id}/image")
+@Operation(summary = "Upload medicine image")
+@PreAuthorize("hasRole('PHARMACIST')")
+public ResponseEntity<String> uploadImage(
+        @PathVariable Long id,
+        @RequestParam("file") MultipartFile file) throws IOException {
+    String imageUrl = imageUploadService.uploadImage(file, id);
+    medicineService.updateImageUrl(id, imageUrl);
+    return ResponseEntity.ok(imageUrl);
+}
+```
+
+**Estimated Time:** 6 hours
+
+---
+
+### Day 8-10: Stock Adjustment Audit Trail
+
+#### Task 2.3: Create StockAdjustment Entity
+
+**File:** `src/main/java/com/pharmacy/model/StockAdjustment.java`
+
+```java
+@Entity
+@Table(name = "stock_adjustments")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class StockAdjustment {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medicine_id", nullable = false)
+    private Medicine medicine;
+    
+    @Column(nullable = false)
+    private Integer previousQuantity;
+    
+    @Column(nullable = false)
+    private Integer newQuantity;
+    
+    @Column(nullable = false)
+    private Integer adjustmentAmount;  // Can be positive or negative
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private AdjustmentType type;
+    
+    @Column(length = 500)
+    private String reason;
+    
+    @Column(nullable = false)
+    private String performedBy;  // Username
+    
+    @Column(nullable = false)
+    private LocalDateTime adjustmentDate;
+    
+    private String batchNumber;
+    
+    @PrePersist
+    protected void onCreate() {
+        adjustmentDate = LocalDateTime.now();
+    }
+}
+```
+
+**Create AdjustmentType Enum:**
+```java
+public enum AdjustmentType {
+    SALE,           // Sold to customer
+    PURCHASE,       // New stock received
+    DAMAGE,         // Damaged/broken items
+    EXPIRY,         // Expired items removed
+    RETURN,         // Customer return
+    THEFT,          // Theft/loss
+    MANUAL,         // Manual correction
+    TRANSFER_IN,    // Transfer from another location
+    TRANSFER_OUT    // Transfer to another location
+}
+```
+
+**Create DTOs:**
+```java
+@Data
+@Builder
+public class StockAdjustmentRequest {
+    @NotNull
+    private Integer quantity;
+    
+    @NotNull
+    private AdjustmentType type;
+    
+    @NotBlank
+    private String reason;
+    
+    private String batchNumber;
+}
+
+@Data
+@Builder
+public class StockAdjustmentResponse {
+    private Long id;
+    private Long medicineId;
+    private String medicineName;
+    private Integer previousQuantity;
+    private Integer newQuantity;
+    private Integer adjustmentAmount;
+    private AdjustmentType type;
+    private String reason;
+    private String performedBy;
+    private LocalDateTime adjustmentDate;
+    private String batchNumber;
+}
+```
+
+**Create Repository:**
+```java
+@Repository
+public interface StockAdjustmentRepository extends JpaRepository<StockAdjustment, Long> {
+    List<StockAdjustment> findByMedicineIdOrderByAdjustmentDateDesc(Long medicineId);
+    List<StockAdjustment> findByPerformedBy(String username);
+    List<StockAdjustment> findByType(AdjustmentType type);
+    
+    @Query("SELECT sa FROM StockAdjustment sa WHERE sa.adjustmentDate BETWEEN :start AND :end")
+    List<StockAdjustment> findByDateRange(
+        @Param("start") LocalDateTime start, 
+        @Param("end") LocalDateTime end
+    );
+}
+```
+
+**Create Service:**
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class StockAdjustmentService {
+    
+    private final StockAdjustmentRepository adjustmentRepository;
+    private final MedicineRepository medicineRepository;
+    
+    @Transactional
+    public StockAdjustmentResponse adjustStock(
+            Long medicineId, 
+            StockAdjustmentRequest request, 
+            String username) {
+        
+        Medicine medicine = medicineRepository.findById(medicineId)
+            .orElseThrow(() -> new ResourceNotFoundException("Medicine not found"));
+        
+        int previousQty = medicine.getStockQuantity();
+        int adjustmentAmount = request.getQuantity();
+        
+        // For SALE, DAMAGE, EXPIRY, THEFT, TRANSFER_OUT - reduce stock
+        if (request.getType() == AdjustmentType.SALE ||
+            request.getType() == AdjustmentType.DAMAGE ||
+            request.getType() == AdjustmentType.EXPIRY ||
+            request.getType() == AdjustmentType.THEFT ||
+            request.getType() == AdjustmentType.TRANSFER_OUT) {
+            adjustmentAmount = -Math.abs(adjustmentAmount);
+        }
+        
+        int newQty = previousQty + adjustmentAmount;
+        
+        if (newQty < 0) {
+            throw new IllegalArgumentException("Insufficient stock. Current: " + previousQty);
+        }
+        
+        medicine.setStockQuantity(newQty);
+        medicineRepository.save(medicine);
+        
+        StockAdjustment adjustment = StockAdjustment.builder()
+            .medicine(medicine)
+            .previousQuantity(previousQty)
+            .newQuantity(newQty)
+            .adjustmentAmount(adjustmentAmount)
+            .type(request.getType())
+            .reason(request.getReason())
+            .performedBy(username)
+            .batchNumber(request.getBatchNumber())
+            .build();
+        
+        StockAdjustment saved = adjustmentRepository.save(adjustment);
+        
+        log.info("Stock adjusted for medicine {}: {} -> {} ({})", 
+            medicine.getName(), previousQty, newQty, request.getType());
+        
+        return toResponse(saved);
+    }
+    
+    public List<StockAdjustmentResponse> getMedicineHistory(Long medicineId) {
+        return adjustmentRepository.findByMedicineIdOrderByAdjustmentDateDesc(medicineId)
+            .stream()
+            .map(this::toResponse)
+            .collect(Collectors.toList());
+    }
+    
+    private StockAdjustmentResponse toResponse(StockAdjustment adjustment) {
+        return StockAdjustmentResponse.builder()
+            .id(adjustment.getId())
+            .medicineId(adjustment.getMedicine().getId())
+            .medicineName(adjustment.getMedicine().getName())
+            .previousQuantity(adjustment.getPreviousQuantity())
+            .newQuantity(adjustment.getNewQuantity())
+            .adjustmentAmount(adjustment.getAdjustmentAmount())
+            .type(adjustment.getType())
+            .reason(adjustment.getReason())
+            .performedBy(adjustment.getPerformedBy())
+            .adjustmentDate(adjustment.getAdjustmentDate())
+            .batchNumber(adjustment.getBatchNumber())
+            .build();
+    }
+}
+```
+
+**Add Controller Endpoints:**
+```java
+@PostMapping("/{id}/adjust-stock")
+@Operation(summary = "Adjust medicine stock with audit trail")
+@PreAuthorize("hasRole('PHARMACIST')")
+public ResponseEntity<StockAdjustmentResponse> adjustStock(
+        @PathVariable Long id,
+        @Valid @RequestBody StockAdjustmentRequest request,
+        Authentication authentication) {
+    return ResponseEntity.ok(
+        stockAdjustmentService.adjustStock(id, request, authentication.getName())
+    );
+}
+
+@GetMapping("/{id}/stock-history")
+@Operation(summary = "Get stock adjustment history for medicine")
+public ResponseEntity<List<StockAdjustmentResponse>> getStockHistory(
+        @PathVariable Long id) {
+    return ResponseEntity.ok(stockAdjustmentService.getMedicineHistory(id));
+}
+```
+
+**Estimated Time:** 8 hours
+
+---
+
+## Week 3: Testing & Documentation
+
+### Day 11-12: Unit & Integration Tests
+
+#### Task 3.1: Write Tests
+
+**MedicineServiceTest.java:**
+```java
+@SpringBootTest
+@Transactional
+class MedicineServiceTest {
+    
+    @Autowired
+    private MedicineService medicineService;
+    
+    @Test
+    void testGetMedicineByBarcode() {
+        // Create test medicine with barcode
+        MedicineRequest request = MedicineRequest.builder()
+            .name("Test Medicine")
+            .barcode("1234567890123")
+            .sellingPrice(100.0)
+            .stockQuantity(50)
+            .build();
+        
+        MedicineResponse created = medicineService.addMedicine(request);
+        
+        // Test barcode search
+        MedicineResponse found = medicineService.getMedicineByBarcode("1234567890123");
+        
+        assertNotNull(found);
+        assertEquals("Test Medicine", found.getName());
+    }
+    
+    @Test
+    void testGetExpiringSoon() {
+        // Create medicine expiring in 15 days
+        MedicineRequest request = MedicineRequest.builder()
+            .name("Expiring Medicine")
+            .expiryDate(LocalDate.now().plusDays(15))
+            .sellingPrice(100.0)
+            .stockQuantity(10)
+            .build();
+        
+        medicineService.addMedicine(request);
+        
+        // Test expiring soon
+        List<MedicineResponse> expiring = medicineService.getExpiringSoon(30);
+        
+        assertTrue(expiring.size() > 0);
+    }
+    
+    // Add more tests...
+}
+```
+
+**Estimated Time:** 12 hours
+
+---
+
+### Day 13-15: Documentation & Cleanup
+
+#### Task 3.2: Update Swagger Documentation
+
+**Update SwaggerConfig.java:**
+```java
+@Configuration
+public class SwaggerConfig {
+    
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+            .info(new Info()
+                .title("Zcare Pharmacy Management API")
+                .version("2.0")
+                .description("Complete pharmacy management system with barcode scanning, " +
+                           "prescription management, and inventory tracking")
+                .contact(new Contact()
+                    .name("Zcare Support")
+                    .email("support@zcare.com")))
+            .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+            .components(new Components()
+                .addSecuritySchemes("bearerAuth", 
+                    new SecurityScheme()
+                        .type(SecurityScheme.Type.HTTP)
+                        .scheme("bearer")
+                        .bearerFormat("JWT")));
+    }
+}
+```
+
+**Estimated Time:** 4 hours
+
+---
+
+**Phase 1 Complete! ✅**
+
+**Deliverables:**
+- ✅ Barcode scanning support
+- ✅ Enhanced medicine fields (25+ new fields)
+- ✅ Pagination on all list endpoints
+- ✅ Image upload functionality
+- ✅ Stock adjustment audit trail
+- ✅ Expiry alerts (configurable days)
+- ✅ Comprehensive tests
+- ✅ Updated documentation
+
+---
+
+# Phase 2: Core Pharmacy Features (Weeks 4-6)
+
+## Week 4: Customer/Patient Management
+
+### Task 4.1: Create Customer Entity
+
+**File:** `src/main/java/com/pharmacy/model/Customer.java`
+
+```java
+@Entity
+@Table(name = "customers")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Customer {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(nullable = false)
+    private String firstName;
+    
+    @Column(nullable = false)
+    private String lastName;
+    
+    @Column(unique = true, nullable = false)
+    private String phone;
+    
+    @Column(unique = true)
+    private String email;
+    
+    private LocalDate dateOfBirth;
+    
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+    
+    @Column(length = 500)
+    private String address;
+    
+    private String city;
+    private String state;
+    private String zipCode;
+    
+    @Column(length = 1000)
+    private String allergies;  // Comma-separated
+    
+    @Column(length = 1000)
+    private String chronicConditions;  // Comma-separated
+    
+    @Column(length = 500)
+    private String insuranceProvider;
+    
+    @Column(length = 100)
+    private String insurancePolicyNumber;
+    
+    @Column(length = 500)
+    private String emergencyContactName;
+    
+    @Column(length = 20)
+    private String emergencyContactPhone;
+    
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<Prescription> prescriptions = new ArrayList<>();
+    
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL)
+    private List<CustomerOrder> orders = new ArrayList<>();
+    
+    private Boolean isActive = true;
+    
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+}
+```
+
+**Create Gender Enum:**
+```java
+public enum Gender {
+    MALE, FEMALE, OTHER, PREFER_NOT_TO_SAY
+}
+```
+
+**Create DTOs, Repository, Service, Controller** (similar pattern to Medicine)
+
+**Estimated Time:** 16 hours
+
+---
+
+## Week 5: Prescription Management
+
+### Task 5.1: Create Prescription Entities
+
+**Prescription.java:**
+```java
+@Entity
+@Table(name = "prescriptions")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Prescription {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer;
+    
+    @Column(nullable = false)
+    private String doctorName;
+    
+    @Column(length = 100)
+    private String doctorLicense;
+    
+    @Column(length = 200)
+    private String doctorSpecialization;
+    
+    @Column(length = 20)
+    private String doctorPhone;
+    
+    @Column(nullable = false)
+    private LocalDate prescriptionDate;
+    
+    @Column(nullable = false)
+    private LocalDate validUntil;
+    
+    @OneToMany(mappedBy = "prescription", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PrescriptionItem> items = new ArrayList<>();
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private PrescriptionStatus status;
+    
+    @Column(length = 1000)
+    private String diagnosis;
+    
+    @Column(length = 1000)
+    private String notes;
+    
+    private LocalDateTime dispensedAt;
+    private String dispensedBy;
+    
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (status == null) {
+            status = PrescriptionStatus.PENDING;
+        }
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+}
+```
+
+**PrescriptionItem.java:**
+```java
+@Entity
+@Table(name = "prescription_items")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PrescriptionItem {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "prescription_id", nullable = false)
+    private Prescription prescription;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medicine_id", nullable = false)
+    private Medicine medicine;
+    
+    @Column(nullable = false)
+    private Integer quantity;
+    
+    @Column(length = 500, nullable = false)
+    private String dosageInstructions;  // e.g., "1 tablet twice daily after meals"
+    
+    private Integer durationDays;  // Treatment duration
+    
+    private Boolean isDispensed = false;
+    
+    private LocalDateTime dispensedAt;
+}
+```
+
+**PrescriptionStatus Enum:**
+```java
+public enum PrescriptionStatus {
+    PENDING,      // Not yet dispensed
+    PARTIAL,      // Partially dispensed
+    DISPENSED,    // Fully dispensed
+    EXPIRED,      // Validity period passed
+    CANCELLED     // Cancelled by doctor/patient
+}
+```
+
+**Estimated Time:** 20 hours (includes DTOs, Repository, Service, Controller, Tests)
+
+---
+
+## Week 6: Batch/Lot Tracking
+
+### Task 6.1: Create MedicineBatch Entity
+
+**MedicineBatch.java:**
+```java
+@Entity
+@Table(name = "medicine_batches")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class MedicineBatch {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "medicine_id", nullable = false)
+    private Medicine medicine;
+    
+    @Column(unique = true, nullable = false, length = 100)
+    private String batchNumber;
+    
+    @Column(nullable = false)
+    private LocalDate manufactureDate;
+    
+    @Column(nullable = false)
+    private LocalDate expiryDate;
+    
+    @Column(nullable = false)
+    private Integer initialQuantity;
+    
+    @Column(nullable = false)
+    private Integer currentQuantity;
+    
+    @Column(nullable = false)
+    private Double costPricePerUnit;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "supplier_id")
+    private Supplier supplier;
+    
+    @Column(length = 100)
+    private String invoiceNumber;
+    
+    private LocalDate receivedDate;
+    
+    @Column(length = 500)
+    private String storageLocation;
+    
+    @Column(length = 1000)
+    private String notes;
+    
+    private Boolean isActive = true;
+    
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        if (currentQuantity == null) {
+            currentQuantity = initialQuantity;
+        }
+    }
+}
+```
+
+**Create Supplier Entity:**
+```java
+@Entity
+@Table(name = "suppliers")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Supplier {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(nullable = false)
+    private String name;
+    
+    @Column(unique = true)
+    private String code;  // Supplier code
+    
+    @Column(length = 20)
+    private String phone;
+    
+    private String email;
+    
+    @Column(length = 500)
+    private String address;
+    
+    private String city;
+    private String state;
+    private String zipCode;
+    private String country;
+    
+    @Column(length = 100)
+    private String contactPerson;
+    
+    @Column(length = 100)
+    private String taxId;  // GST/VAT number
+    
+    @Column(length = 1000)
+    private String notes;
+    
+    private Boolean isActive = true;
+    
+    @OneToMany(mappedBy = "supplier")
+    private List<MedicineBatch> batches = new ArrayList<>();
+    
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    private LocalDateTime updatedAt;
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+}
+```
+
+**Estimated Time:** 20 hours (includes DTOs, Repository, Service, Controller, Tests)
+
+---
+
+**Phase 2 Complete! ✅**
+
+**Deliverables:**
+- ✅ Customer/Patient management
+- ✅ Prescription module (create, dispense, track)
+- ✅ Batch/Lot tracking
+- ✅ Supplier management
+- ✅ Full CRUD for all entities
+- ✅ Tests for all features
+
+---
+
+# Phase 3: Business Intelligence (Weeks 7-9)
+
+## Week 7-8: Reporting Module
+
+### Task 7.1: Create Report Service
+
+**ReportService.java:**
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class ReportService {
+    
+    private final MedicineRepository medicineRepository;
+    private final CustomerOrderRepository orderRepository;
+    private final StockAdjustmentRepository adjustmentRepository;
+    private final PrescriptionRepository prescriptionRepository;
+    
+    // SALES REPORTS
+    public SalesReportResponse getSalesReport(LocalDate startDate, LocalDate endDate) {
+        // Implementation
+    }
+    
+    public List<TopSellingMedicineResponse> getTopSellingMedicines(int limit) {
+        // Implementation
+    }
+    
+    // INVENTORY REPORTS
+    public InventoryValuationResponse getInventoryValuation() {
+        // Calculate total inventory value
+    }
+    
+    public List<ExpiryReportResponse> getExpiryReport(int days) {
+        // Medicines expiring in next X days
+    }
+    
+    // FINANCIAL REPORTS
+    public ProfitLossResponse getProfitLossReport(LocalDate startDate, LocalDate endDate) {
+        // Calculate profit/loss
+    }
+    
+    // CUSTOMER REPORTS
+    public List<CustomerPurchaseHistoryResponse> getCustomerHistory(Long customerId) {
+        // Customer purchase history
+    }
+}
+```
+
+**Create Report DTOs and endpoints**
+
+**Estimated Time:** 24 hours
+
+---
+
+## Week 9: Notifications & Alerts
+
+### Task 8.1: Create Notification System
+
+**NotificationService.java:**
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class NotificationService {
+    
+    private final JavaMailSender mailSender;
+    
+    public void sendExpiryAlert(List<Medicine> expiringMedicines) {
+        // Send email alert for expiring medicines
+    }
+    
+    public void sendLowStockAlert(List<Medicine> lowStockMedicines) {
+        // Send email alert for low stock
+    }
+    
+    public void sendPrescriptionReadyNotification(Prescription prescription) {
+        // Notify customer prescription is ready
+    }
+}
+```
+
+**Create Scheduled Tasks:**
+```java
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class ScheduledTasks {
+    
+    private final MedicineService medicineService;
+    private final NotificationService notificationService;
+    
+    @Scheduled(cron = "0 0 9 * * *")  // Daily at 9 AM
+    public void checkExpiringMedicines() {
+        List<Medicine> expiring = medicineService.getExpiringSoon(30);
+        if (!expiring.isEmpty()) {
+            notificationService.sendExpiryAlert(expiring);
+        }
+    }
+    
+    @Scheduled(cron = "0 0 10 * * *")  // Daily at 10 AM
+    public void checkLowStock() {
+        List<Medicine> lowStock = medicineService.getBelowReorderPoint();
+        if (!lowStock.isEmpty()) {
+            notificationService.sendLowStockAlert(lowStock);
+        }
+    }
+}
+```
+
+**Estimated Time:** 16 hours
+
+---
+
+**Phase 3 Complete! ✅**
+
+**Deliverables:**
+- ✅ Sales reports
+- ✅ Inventory reports
+- ✅ Financial reports
+- ✅ Customer reports
+- ✅ Email notifications
+- ✅ Scheduled alerts
+
+---
+
+# Phase 4: Advanced Features (Weeks 10-12)
+
+## Week 10-11: Purchase Orders & Advanced Stock Management
+
+### Task 9.1: Purchase Order System
+
+**PurchaseOrder.java:**
+```java
+@Entity
+@Table(name = "purchase_orders")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class PurchaseOrder {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    
+    @Column(unique = true, nullable = false)
+    private String poNumber;  // PO-2026-001
+    
+    @ManyToOne
+    @JoinColumn(name = "supplier_id", nullable = false)
+    private Supplier supplier;
+    
+    @Column(nullable = false)
+    private LocalDate orderDate;
+    
+    private LocalDate expectedDeliveryDate;
+    private LocalDate actualDeliveryDate;
+    
+    @OneToMany(mappedBy = "purchaseOrder", cascade = CascadeType.ALL)
+    private List<PurchaseOrderItem> items = new ArrayList<>();
+    
+    @Column(nullable = false)
+    private Double totalAmount;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private POStatus status;
+    
+    private String createdBy;
+    private String approvedBy;
+    private String receivedBy;
+    
+    @Column(length = 1000)
+    private String notes;
+    
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+    
+    private LocalDateTime updatedAt;
+}
+```
+
+**POStatus Enum:**
+```java
+public enum POStatus {
+    DRAFT,
+    PENDING_APPROVAL,
+    APPROVED,
+    ORDERED,
+    PARTIALLY_RECEIVED,
+    RECEIVED,
+    CANCELLED
+}
+```
+
+**Estimated Time:** 24 hours
+
+---
+
+## Week 12: Flutter Optimization & Final Testing
+
+### Task 10.1: Flutter-Specific Endpoints
+
+**Add endpoints for mobile app:**
+```java
+// Dashboard summary
+@GetMapping("/dashboard/summary")
+public ResponseEntity<DashboardSummaryResponse> getDashboardSummary() {
+    return ResponseEntity.ok(dashboardService.getSummary());
+}
+
+// Quick search (autocomplete)
+@GetMapping("/search/quick")
+public ResponseEntity<List<QuickSearchResponse>> quickSearch(@RequestParam String query) {
+    return ResponseEntity.ok(medicineService.quickSearch(query));
+}
+
+// Barcode batch scan
+@PostMapping("/barcode/batch-scan")
+public ResponseEntity<List<MedicineResponse>> batchScan(@RequestBody List<String> barcodes) {
+    return ResponseEntity.ok(medicineService.getMedicinesByBarcodes(barcodes));
+}
+```
+
+**Estimated Time:** 16 hours
+
+---
+
+### Task 10.2: Comprehensive Testing
+
+- Integration tests for all modules
+- API testing with Postman/REST Assured
+- Performance testing
+- Security testing
+
+**Estimated Time:** 24 hours
+
+---
+
+**Phase 4 Complete! ✅**
+
+**Deliverables:**
+- ✅ Purchase order system
+- ✅ Flutter-optimized endpoints
+- ✅ Comprehensive testing
+- ✅ Performance optimization
+- ✅ Security hardening
+
+---
+
+# 🧪 Testing Strategy
+
+## Unit Tests
+- Test all service methods
+- Test validation logic
+- Test calculations (profit margin, stock levels)
+
+## Integration Tests
+- Test API endpoints
+- Test database operations
+- Test authentication/authorization
+
+## Performance Tests
+- Load testing with 1000+ concurrent users
+- Database query optimization
+- Caching strategy
+
+## Security Tests
+- SQL injection prevention
+- XSS prevention
+- Authentication bypass attempts
+- Rate limiting
+
+---
+
+# 🚀 Deployment Plan
+
+## Environment Setup
+
+### Development
+- H2 in-memory database
+- Local file storage
+- Debug logging enabled
+
+### Staging
+- PostgreSQL database
+- Cloud storage (AWS S3/Cloudinary)
+- Info logging
+
+### Production
+- PostgreSQL (managed service)
+- CDN for images
+- Error logging only
+- SSL/HTTPS enforced
+- Backup strategy
+
+## Deployment Platforms
+
+### Option 1: Railway
+```bash
+# Deploy to Railway
+railway login
+railway init
+railway up
+```
+
+### Option 2: Render
+- Connect GitHub repo
+- Auto-deploy on push
+- Free tier available
+
+### Option 3: AWS
+- EC2 for application
+- RDS for database
+- S3 for file storage
+- CloudFront for CDN
+
+---
+
+# 📱 Flutter Integration Timeline
+
+## Week 1-2: Setup & Authentication
+- HTTP client setup
+- JWT token management
+- Login/Register screens
+
+## Week 3-4: Medicine Management
+- Medicine list with pagination
+- Barcode scanner integration
+- Add/Edit medicine forms
+
+## Week 5-6: Sales & Billing
+- POS screen
+- Barcode scanning for sales
+- Receipt generation
+
+## Week 7-8: Prescriptions
+- Prescription entry
+- Customer management
+- Prescription dispensing
+
+## Week 9-10: Reports & Dashboard
+- Dashboard with charts
+- Sales reports
+- Inventory reports
+
+## Week 11-12: Polish & Testing
+- UI/UX improvements
+- Offline support
+- Testing & bug fixes
+
+---
+
+# 📊 Success Metrics
+
+## Technical Metrics
+- API response time < 200ms
+- Database query time < 50ms
+- 99.9% uptime
+- Zero critical security vulnerabilities
+
+## Business Metrics
+- Support 1000+ medicines
+- Handle 100+ concurrent users
+- Process 500+ orders/day
+- Generate reports in < 5 seconds
+
+---
+
+# 🎯 Conclusion
+
+**Total Timeline:** 12 weeks (3 months)
+
+**Team Required:**
+- 1 Backend Developer (full-time)
+- 1 Flutter Developer (full-time, starting Week 7)
+- 1 QA Tester (part-time, starting Week 9)
+
+**Budget Estimate:**
+- Development: 3 months × 2 developers
+- Infrastructure: $50-100/month (Railway/Render)
+- Tools & Services: $50/month
+
+**Risk Mitigation:**
+- Weekly progress reviews
+- Continuous testing
+- Incremental deployment
+- Feature flags for rollback
+
+**Next Steps:**
+1. Review and approve this plan
+2. Set up development environment
+3. Create project board (Jira/Trello)
+4. Start Phase 1, Week 1, Day 1!
+
+---
+
+**Ready to build a world-class pharmacy management system! 🚀**
+
