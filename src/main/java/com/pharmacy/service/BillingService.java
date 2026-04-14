@@ -1,5 +1,10 @@
 package com.pharmacy.service;
 
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.pharmacy.dto.CustomerOrderResponse;
 import com.pharmacy.dto.OrderItemRequest;
 import com.pharmacy.dto.OrderItemResponse;
@@ -9,19 +14,14 @@ import com.pharmacy.model.Medicine;
 import com.pharmacy.model.OrderItem;
 import com.pharmacy.repository.CustomerOrderRepository;
 import com.pharmacy.repository.MedicineRepository;
-import com.pharmacy.repository.OrderItemRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class BillingService {
 
     private final CustomerOrderRepository customerOrderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final MedicineRepository medicineRepository;
 
     @Transactional
