@@ -36,9 +36,10 @@ public class SwaggerConfig {
                     
                     ## Features
                     - Medicine Inventory Management
-                    - Prescription Management
-                    - Billing & Invoices
-                    - Reports & Analytics
+                    - Billing & Order History
+                    - Stock Adjustment Audit Trail
+                    - Direct `imageUrl`-based medicine images
+                    - Soft delete, restore, barcode, and expiring-soon lookups
                     """)
                 .version("1.0.0")
                 .contact(new Contact()

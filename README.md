@@ -75,15 +75,32 @@ http://localhost:8080/swagger-ui.html
 | Method | Endpoint                        | Description              |
 |--------|---------------------------------|--------------------------|
 | GET    | `/api/medicines`                | Get all medicines        |
+| GET    | `/api/medicines/page`           | Get paginated medicines  |
 | GET    | `/api/medicines/{id}`           | Get medicine by ID       |
+| GET    | `/api/medicines/barcode/{barcode}` | Get medicine by barcode |
 | POST   | `/api/medicines`                | Add new medicine         |
 | PUT    | `/api/medicines/{id}`           | Update medicine          |
-| DELETE | `/api/medicines/{id}`           | Delete medicine (Admin)  |
+| DELETE | `/api/medicines/{id}`           | Deactivate medicine (soft delete) |
+| PATCH  | `/api/medicines/{id}/restore`   | Restore deactivated medicine |
+| GET    | `/api/medicines/inactive`       | List deactivated medicines |
 | GET    | `/api/medicines/search?name=X`  | Search by name           |
 | GET    | `/api/medicines/category/{cat}` | Filter by category       |
+| GET    | `/api/medicines/batch/{batchNumber}` | Lookup by batch number |
 | GET    | `/api/medicines/expiring-soon`  | Expiring within 30 days  |
 | GET    | `/api/medicines/low-stock`      | Stock below threshold    |
 | PATCH  | `/api/medicines/{id}/stock`     | Adjust stock quantity    |
+
+Medicine records use `imageUrl` for image references. Binary upload endpoints are not part of the current API, and `price`/`sellingPrice` are mirrored during the transition.
+
+### Billing & Stock Audit (Requires JWT token)
+| Method | Endpoint                               | Description                      |
+|--------|----------------------------------------|----------------------------------|
+| POST   | `/api/orders`                          | Create a customer order          |
+| GET    | `/api/orders`                          | List all orders                  |
+| GET    | `/api/orders/{id}`                     | Get an order by ID               |
+| GET    | `/api/stock-adjustments`               | List stock adjustment history    |
+| GET    | `/api/stock-adjustments/medicine/{id}` | Get audit history for a medicine |
+| POST   | `/api/stock-adjustments`               | Record a manual stock change     |
 
 ---
 
@@ -130,17 +147,26 @@ src/main/java/com/pharmacy/
 │   └── DataSeeder.java          ← Creates default users & sample data
 ├── controller/
 │   ├── AuthController.java      ← /api/auth/** endpoints
-│   └── MedicineController.java  ← /api/medicines/** endpoints
+│   ├── BillingController.java    ← /api/orders/** endpoints
+│   ├── MedicineController.java   ← /api/medicines/** endpoints
+│   ├── StockAdjustmentController.java ← /api/stock-adjustments/** endpoints
+│   └── UserController.java       ← /api/users/** endpoints
 ├── service/
 │   ├── AuthService.java         ← Register/login business logic
+│   ├── BillingService.java       ← Order creation & history
 │   ├── MedicineService.java     ← Inventory business logic
+│   ├── StockAdjustmentService.java ← Stock audit trail logic
 │   └── UserDetailsServiceImpl.java ← Spring Security integration
 ├── repository/
 │   ├── UserRepository.java      ← User DB queries
-│   └── MedicineRepository.java  ← Medicine DB queries
+│   ├── CustomerOrderRepository.java ← Order DB queries
+│   ├── MedicineRepository.java  ← Medicine DB queries
+│   └── StockAdjustmentRepository.java ← Stock audit DB queries
 ├── model/
 │   ├── User.java                ← User entity + roles
-│   └── Medicine.java            ← Medicine entity
+│   ├── Medicine.java            ← Medicine entity
+│   ├── CustomerOrder.java       ← Order entity
+│   └── StockAdjustment.java     ← Inventory audit entity
 ├── security/
 │   ├── JwtUtil.java             ← Generate & validate JWT tokens
 │   └── JwtAuthFilter.java       ← Intercept & authenticate requests
@@ -191,6 +217,7 @@ Once running, open: `http://localhost:8080/swagger-ui.html`
 You will see all endpoints organized by tag:
 - **Authentication** — Register & Login
 - **Medicine Inventory** — Full CRUD + search + alerts
+- **Billing & Stock Audit** — Orders and inventory adjustment history
 
 Steps:
 1. Use `POST /api/auth/login` with admin credentials
@@ -211,7 +238,7 @@ Steps:
 ## 🛠️ Tech Stack
 | Technology | Version | Purpose |
 |---|---|---|
-| Spring Boot | 3.2.0 | Framework |
+| Spring Boot | 3.5.12 | Framework |
 | Spring Security | 6.x | Authentication |
 | PostgreSQL | 15 | Database |
 | jjwt | 0.12.3 | JWT tokens |

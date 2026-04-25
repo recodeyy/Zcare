@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.pharmacy.dto.CustomerOrderResponse;
 import com.pharmacy.dto.OrderItemRequest;
 import com.pharmacy.dto.OrderItemResponse;
+import com.pharmacy.exception.InsufficientStockException;
 import com.pharmacy.exception.ResourceNotFoundException;
 import com.pharmacy.model.CustomerOrder;
 import com.pharmacy.model.Medicine;
@@ -23,6 +24,7 @@ public class BillingService {
 
     private final CustomerOrderRepository customerOrderRepository;
     private final MedicineRepository medicineRepository;
+    private final StockAdjustmentService stockAdjustmentService;
 
     @Transactional
     public CustomerOrderResponse createOrder(List<OrderItemRequest> items, String createdBy) {
@@ -44,16 +46,17 @@ public class BillingService {
                 throw new IllegalArgumentException("Quantity must be greater than 0");
             }
 
-            Medicine medicine = medicineRepository.findById(request.getMedicineId())
+                Medicine medicine = medicineRepository.findActiveForUpdate(request.getMedicineId())
                     .orElseThrow(() -> new ResourceNotFoundException(
                             "Medicine not found with id: " + request.getMedicineId()));
 
             if (request.getQuantity() > medicine.getStockQuantity()) {
-                throw new IllegalArgumentException(
+                throw new InsufficientStockException(
                         "Insufficient stock for medicine: " + medicine.getName());
             }
 
-            double itemTotal = medicine.getPrice() * request.getQuantity();
+                double unitPrice = medicine.getSellingPrice() != null ? medicine.getSellingPrice() : medicine.getPrice();
+                double itemTotal = unitPrice * request.getQuantity();
             medicine.setStockQuantity(medicine.getStockQuantity() - request.getQuantity());
 
             OrderItem orderItem = OrderItem.builder()
@@ -70,7 +73,28 @@ public class BillingService {
         order.setTotalAmount(totalAmount);
         CustomerOrder savedOrder = customerOrderRepository.save(order);
 
+        savedOrder.getItems().forEach(item -> stockAdjustmentService.recordSaleAdjustment(
+            item.getMedicine(),
+            item.getQuantity(),
+            createdBy,
+            String.valueOf(savedOrder.getId())
+        ));
+
         return toResponse(savedOrder);
+    }
+
+    @Transactional(readOnly = true)
+    public List<CustomerOrderResponse> getAllOrders() {
+        return customerOrderRepository.findAll().stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public CustomerOrderResponse getOrderById(Long id) {
+        CustomerOrder order = customerOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found with id: " + id));
+        return toResponse(order);
     }
 
     private CustomerOrderResponse toResponse(CustomerOrder order) {

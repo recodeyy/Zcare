@@ -1,19 +1,20 @@
 package com.pharmacy.service;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.pharmacy.dto.AuthRequest;
 import com.pharmacy.dto.AuthResponse;
 import com.pharmacy.dto.RegisterRequest;
 import com.pharmacy.model.User;
 import com.pharmacy.repository.UserRepository;
 import com.pharmacy.security.JwtUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.dao.DataIntegrityViolationException;
 
-import org.springframework.lang.NonNull;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +41,7 @@ public class AuthService {
                                 .password(passwordEncoder.encode(request.getPassword()))
                                 .fullName(request.getFullName())
                                 .email(request.getEmail())
-                                .role(User.Role.PHARMACIST) // Always force initial role as PHARMACIST
+                                .role(request.getRole())
                                 .active(true)
                                 .build();
 

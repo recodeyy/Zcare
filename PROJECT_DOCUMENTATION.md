@@ -29,6 +29,8 @@
 
 - 🔐 JWT-based authentication and authorization
 - 📦 Complete medicine inventory management
+- 💳 Order creation and billing history
+- 🧾 Stock adjustment audit trail
 - 👥 Role-based access control (ADMIN, PHARMACIST)
 - 📊 Real-time inventory tracking
 - ⏰ Expiry date management
@@ -42,6 +44,7 @@
 
 ### Core Framework
 - **Spring Boot 3.2.0** - Framework
+- **Spring Boot 3.5.12** - Framework
 - **Spring Security** - Authentication & Authorization
 - **Spring Data JPA** - ORM & Database access
 - **Java 17** - Programming language
@@ -90,20 +93,29 @@ pharmacy-backend/
 │   │   │   │
 │   │   │   ├── controller/                  # REST endpoints
 │   │   │   │   ├── AuthController.java      # Login & Register endpoints
-│   │   │   │   └── MedicineController.java  # Medicine CRUD endpoints
+│   │   │   │   ├── BillingController.java   # Order endpoints
+│   │   │   │   ├── MedicineController.java  # Medicine CRUD endpoints
+│   │   │   │   ├── StockAdjustmentController.java  # Stock audit endpoints
+│   │   │   │   └── UserController.java      # Admin user management
 │   │   │   │
 │   │   │   ├── service/                     # Business logic
 │   │   │   │   ├── AuthService.java         # Authentication logic
+│   │   │   │   ├── BillingService.java      # Order history & creation
 │   │   │   │   ├── MedicineService.java     # Medicine business logic
+│   │   │   │   ├── StockAdjustmentService.java  # Stock audit trail logic
 │   │   │   │   └── UserDetailsServiceImpl.java  # Spring Security integration
 │   │   │   │
 │   │   │   ├── repository/                  # Database access
 │   │   │   │   ├── UserRepository.java      # User queries
-│   │   │   │   └── MedicineRepository.java  # Medicine queries
+│   │   │   │   ├── CustomerOrderRepository.java  # Order queries
+│   │   │   │   ├── MedicineRepository.java  # Medicine queries
+│   │   │   │   └── StockAdjustmentRepository.java  # Stock audit queries
 │   │   │   │
 │   │   │   ├── model/                       # JPA entities
 │   │   │   │   ├── User.java                # User entity with UserDetails
-│   │   │   │   └── Medicine.java            # Medicine/Drug inventory entity
+│   │   │   │   ├── Medicine.java            # Medicine/Drug inventory entity
+│   │   │   │   ├── CustomerOrder.java       # Customer order entity
+│   │   │   │   └── StockAdjustment.java     # Stock audit entity
 │   │   │   │
 │   │   │   ├── dto/                         # Data Transfer Objects
 │   │   │   │   └── AuthDtos.java            # Auth request/response DTOs
@@ -136,7 +148,8 @@ pharmacy-backend/
 ```
 ┌─────────────────────────────────────┐
 │   REST Controller Layer             │
-│  (AuthController, MedicineController)
+│  (AuthController, MedicineController, BillingController,
+│   StockAdjustmentController, UserController)
 ├─────────────────────────────────────┤
 │   Service Layer                     │
 │  (Business Logic & Validation)      │
@@ -322,12 +335,18 @@ public class Medicine {
     private String category;
     
     private String manufacturer;
+
+  @Column(unique = true)
+  private String barcode;
     
     @Column(nullable = false)
     private String batchNumber;
     
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
+
+  @Column(precision = 10, scale = 2)
+  private Double sellingPrice;
     
     @Column(nullable = false)
     private Integer stockQuantity;
@@ -338,6 +357,12 @@ public class Medicine {
     private String description;
     
     private String unit;  // tablet, ml, capsule, etc.
+
+  private String imageUrl;
+
+  private String activeIngredient;
+
+  private Boolean isActive = true;
     
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -420,6 +445,21 @@ Response (200 OK):
 ]
 ```
 
+#### Get Paginated Medicines
+```http
+GET /api/medicines/page?page=0&size=10
+Authorization: Bearer {token}
+
+Response (200 OK):
+{
+  "content": [
+    {...}
+  ],
+  "totalElements": 12,
+  ...
+}
+```
+
 #### Get Medicine by ID
 ```http
 GET /api/medicines/{id}
@@ -430,6 +470,19 @@ Response (200 OK):
   "id": 1,
   "name": "Paracetamol",
   "genericName": "Acetaminophen",
+  ...
+}
+```
+
+#### Get Medicine by Barcode
+```http
+GET /api/medicines/barcode/{barcode}
+Authorization: Bearer {token}
+
+Response (200 OK):
+{
+  "id": 1,
+  "barcode": "PARA-500",
   ...
 }
 ```
@@ -480,12 +533,35 @@ Response (200 OK):
 }
 ```
 
-#### Delete Medicine (ADMIN only)
+#### Deactivate Medicine (soft delete)
 ```http
 DELETE /api/medicines/{id}
 Authorization: Bearer {token}
 
 Response (204 No Content)
+```
+
+#### Restore Medicine
+```http
+PATCH /api/medicines/{id}/restore
+Authorization: Bearer {token}
+
+Response (200 OK):
+{
+  "id": 2,
+  ...
+}
+```
+
+#### List Deactivated Medicines
+```http
+GET /api/medicines/inactive
+Authorization: Bearer {token}
+
+Response (200 OK):
+[
+  {...}
+]
 ```
 
 #### Search Medicine by Name
@@ -508,6 +584,18 @@ Response (200 OK):
 [
   {...}
 ]
+```
+
+#### Get Medicine by Batch Number
+```http
+GET /api/medicines/batch/{batchNumber}
+Authorization: Bearer {token}
+
+Response (200 OK):
+{
+  "batchNumber": "BATCH001",
+  ...
+}
 ```
 
 #### Get Expiring Soon (within 30 days)
@@ -556,6 +644,94 @@ Response (200 OK):
 {
   "id": 1,
   "stockQuantity": 50,
+  ...
+}
+```
+
+### Billing & Stock Audit Endpoints (Protected - Requires JWT token)
+
+#### Create Order
+```http
+POST /api/orders
+Authorization: Bearer {token}
+Content-Type: application/json
+
+[
+  {
+    "medicineId": 1,
+    "quantity": 2
+  }
+]
+
+Response (200 OK):
+{
+  "id": 100,
+  ...
+}
+```
+
+#### Get All Orders
+```http
+GET /api/orders
+Authorization: Bearer {token}
+
+Response (200 OK):
+[
+  {...}
+]
+```
+
+#### Get Order by ID
+```http
+GET /api/orders/{id}
+Authorization: Bearer {token}
+
+Response (200 OK):
+{
+  "id": 100,
+  ...
+}
+```
+
+#### List All Stock Adjustments
+```http
+GET /api/stock-adjustments
+Authorization: Bearer {token}
+
+Response (200 OK):
+[
+  {...}
+]
+```
+
+#### Get Stock Adjustment History for a Medicine
+```http
+GET /api/stock-adjustments/medicine/{id}
+Authorization: Bearer {token}
+
+Response (200 OK):
+[
+  {...}
+]
+```
+
+#### Create Manual Stock Adjustment
+```http
+POST /api/stock-adjustments
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "medicineId": 1,
+  "adjustmentType": "PURCHASE",
+  "quantityChange": 5,
+  "reason": "Restock from supplier",
+  "referenceNumber": "GRN-001"
+}
+
+Response (200 OK):
+{
+  "id": 500,
   ...
 }
 ```
@@ -616,14 +792,14 @@ curl -X GET http://localhost:8080/api/medicines \
 
 ### Protected Endpoints
 
-All `/api/medicines/**` endpoints require:
+All `/api/medicines/**`, `/api/orders/**`, and `/api/stock-adjustments/**` endpoints require:
 1. Valid JWT token in `Authorization` header
 2. Token must not be expired
-3. User must be authenticated
+3. User must have `PHARMACIST` role
 
 ### Admin-Only Operations
 
-- **DELETE /api/medicines/{id}** - Only ADMIN role
+- `/api/users/**` endpoints are ADMIN only
 
 ---
 

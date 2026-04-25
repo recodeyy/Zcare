@@ -1,20 +1,34 @@
 package com.pharmacy.controller;
 
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+import org.springframework.lang.NonNull;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.pharmacy.dto.MedicineRequest;
 import com.pharmacy.dto.MedicineResponse;
 import com.pharmacy.service.MedicineService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.lang.NonNull;
-
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/medicines")
@@ -31,11 +45,38 @@ public class MedicineController {
         return ResponseEntity.ok(medicineService.getAllMedicines());
     }
 
+    @GetMapping("/page")
+    @Operation(summary = "Get paginated medicines")
+    public ResponseEntity<Page<MedicineResponse>> getMedicinesPage(@PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(medicineService.getMedicines(pageable));
+    }
+
     @GetMapping("/{id}")
     @Operation(summary = "Get medicine by ID")
     public ResponseEntity<MedicineResponse> getMedicine(
             @Parameter(description = "Medicine ID") @PathVariable @NonNull Long id) {
         return ResponseEntity.ok(medicineService.getMedicineById(id));
+    }
+
+    @GetMapping("/barcode/{barcode}")
+    @Operation(summary = "Get medicine by barcode")
+    public ResponseEntity<MedicineResponse> getMedicineByBarcode(
+            @Parameter(description = "Medicine barcode") @PathVariable @NonNull String barcode) {
+        return ResponseEntity.ok(medicineService.getMedicineByBarcode(barcode));
+    }
+
+    @GetMapping("/category/{category}")
+    @Operation(summary = "Get medicines by category")
+    public ResponseEntity<List<MedicineResponse>> getMedicinesByCategory(
+            @Parameter(description = "Medicine category") @PathVariable @NonNull String category) {
+        return ResponseEntity.ok(medicineService.getMedicinesByCategory(category));
+    }
+
+    @GetMapping("/batch/{batchNumber}")
+    @Operation(summary = "Get medicines by batch number")
+    public ResponseEntity<List<MedicineResponse>> getMedicinesByBatchNumber(
+            @Parameter(description = "Batch number") @PathVariable @NonNull String batchNumber) {
+        return ResponseEntity.ok(medicineService.getMedicinesByBatchNumber(batchNumber));
     }
 
     @PostMapping
@@ -54,9 +95,24 @@ public class MedicineController {
     }
 
     @DeleteMapping("/{id}")
-    @Operation(summary = "Delete medicine from inventory")
+    @Operation(summary = "Soft delete medicine from inventory")
     @PreAuthorize("hasRole('PHARMACIST')")
     public ResponseEntity<Void> deleteMedicine(@PathVariable @NonNull Long id) {
+        medicineService.deleteMedicine(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/restore")
+    @Operation(summary = "Restore a soft-deleted medicine")
+    @PreAuthorize("hasRole('PHARMACIST')")
+    public ResponseEntity<MedicineResponse> restoreMedicine(@PathVariable @NonNull Long id) {
+        return ResponseEntity.ok(medicineService.restoreMedicine(id));
+    }
+
+    @PatchMapping("/{id}/deactivate")
+    @Operation(summary = "Deactivate a medicine")
+    @PreAuthorize("hasRole('PHARMACIST')")
+    public ResponseEntity<Void> deactivateMedicine(@PathVariable @NonNull Long id) {
         medicineService.deleteMedicine(id);
         return ResponseEntity.noContent().build();
     }
@@ -66,6 +122,12 @@ public class MedicineController {
     public ResponseEntity<List<MedicineResponse>> searchMedicines(
             @RequestParam @NonNull String name) {
         return ResponseEntity.ok(medicineService.searchMedicines(name));
+    }
+
+    @GetMapping("/expiring-soon")
+    @Operation(summary = "Get medicines expiring within a configurable number of days")
+    public ResponseEntity<List<MedicineResponse>> getExpiringSoon(@RequestParam(defaultValue = "30") Integer days) {
+        return ResponseEntity.ok(medicineService.getExpiringSoonMedicines(days));
     }
 
     @GetMapping("/low-stock")
@@ -78,5 +140,12 @@ public class MedicineController {
     @Operation(summary = "Get expired medicines")
     public ResponseEntity<List<MedicineResponse>> getExpired() {
         return ResponseEntity.ok(medicineService.getExpiredMedicines());
+    }
+
+    @GetMapping("/inactive")
+    @Operation(summary = "Get soft-deleted medicines")
+    @PreAuthorize("hasRole('PHARMACIST')")
+    public ResponseEntity<List<MedicineResponse>> getInactiveMedicines() {
+        return ResponseEntity.ok(medicineService.getInactiveMedicines());
     }
 }
