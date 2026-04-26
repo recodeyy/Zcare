@@ -1,7 +1,7 @@
 package com.pharmacy.repository;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,7 +10,7 @@ import com.pharmacy.model.StockAdjustment;
 @Repository
 public interface StockAdjustmentRepository extends JpaRepository<StockAdjustment, Long> {
 
-    List<StockAdjustment> findAllByOrderByCreatedAtDesc();
+    Page<StockAdjustment> findAllByOrderByCreatedAtDesc(Pageable pageable);
 
-    List<StockAdjustment> findByMedicine_IdOrderByCreatedAtDesc(Long medicineId);
+    Page<StockAdjustment> findByMedicine_IdOrderByCreatedAtDesc(Long medicineId, Pageable pageable);
 }

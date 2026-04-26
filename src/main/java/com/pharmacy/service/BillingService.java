@@ -64,6 +64,7 @@ public class BillingService {
                     .medicine(medicine)
                     .quantity(request.getQuantity())
                     .price(itemTotal)
+                    .batchNumber(request.getBatchNumber() != null ? request.getBatchNumber() : medicine.getBatchNumber())
                     .build();
 
             order.getItems().add(orderItem);
@@ -77,7 +78,8 @@ public class BillingService {
             item.getMedicine(),
             item.getQuantity(),
             createdBy,
-            String.valueOf(savedOrder.getId())
+            String.valueOf(savedOrder.getId()),
+            item.getBatchNumber()
         ));
 
         return toResponse(savedOrder);
@@ -102,6 +104,7 @@ public class BillingService {
                 .map(item -> OrderItemResponse.builder()
                         .medicineId(item.getMedicine().getId())
                         .medicineName(item.getMedicine().getName())
+                        .batchNumber(item.getBatchNumber())
                         .quantity(item.getQuantity())
                         .lineTotal(item.getPrice())
                         .build())

@@ -13,6 +13,7 @@ public class OrderItemResponse {
 
     private Long medicineId;
     private String medicineName;
+    private String batchNumber;
     private Integer quantity;
     private Double lineTotal;
 }

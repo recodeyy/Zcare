@@ -1,7 +1,7 @@
 package com.pharmacy.controller;
 
-import java.util.List;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -41,13 +41,15 @@ public class StockAdjustmentController {
 
     @GetMapping
     @Operation(summary = "Get all stock adjustments")
-    public ResponseEntity<List<StockAdjustmentResponse>> getAllAdjustments() {
-        return ResponseEntity.ok(stockAdjustmentService.getAllAdjustments());
+    public ResponseEntity<Page<StockAdjustmentResponse>> getAllAdjustments(Pageable pageable) {
+        return ResponseEntity.ok(stockAdjustmentService.getAllAdjustments(pageable));
     }
 
     @GetMapping("/medicine/{medicineId}")
     @Operation(summary = "Get stock adjustments for a medicine")
-    public ResponseEntity<List<StockAdjustmentResponse>> getAdjustmentsByMedicine(@PathVariable Long medicineId) {
-        return ResponseEntity.ok(stockAdjustmentService.getAdjustmentsForMedicine(medicineId));
+    public ResponseEntity<Page<StockAdjustmentResponse>> getAdjustmentsByMedicine(
+            @PathVariable Long medicineId,
+            Pageable pageable) {
+        return ResponseEntity.ok(stockAdjustmentService.getAdjustmentsForMedicine(medicineId, pageable));
     }
 }

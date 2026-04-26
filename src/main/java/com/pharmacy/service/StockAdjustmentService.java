@@ -1,5 +1,10 @@
 package com.pharmacy.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.pharmacy.dto.StockAdjustmentRequest;
 import com.pharmacy.dto.StockAdjustmentResponse;
 import com.pharmacy.exception.InsufficientStockException;
@@ -9,12 +14,9 @@ import com.pharmacy.model.Medicine;
 import com.pharmacy.model.StockAdjustment;
 import com.pharmacy.repository.MedicineRepository;
 import com.pharmacy.repository.StockAdjustmentRepository;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class StockAdjustmentService {
 
     @Transactional
     public StockAdjustmentResponse recordSaleAdjustment(Medicine medicine, int quantitySold, String createdBy,
-            String referenceNumber) {
+            String referenceNumber, String batchNumber) {
         if (medicine == null || medicine.getId() == null) {
             throw new IllegalArgumentException("Medicine is required for stock adjustment");
         }
@@ -60,7 +62,7 @@ public class StockAdjustmentService {
                 .newStockQuantity(newStockQuantity)
                 .reason("Order sale")
                 .referenceNumber(referenceNumber)
-                .batchNumber(medicine.getBatchNumber())
+                .batchNumber(batchNumber != null ? batchNumber : medicine.getBatchNumber())
                 .createdBy(normalizeAdjustedBy(createdBy))
                 .build();
 
@@ -68,20 +70,18 @@ public class StockAdjustmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<StockAdjustmentResponse> getAllAdjustments() {
-        return stockAdjustmentRepository.findAllByOrderByCreatedAtDesc().stream()
-                .map(this::toResponse)
-                .toList();
+    public Page<StockAdjustmentResponse> getAllAdjustments(Pageable pageable) {
+        return stockAdjustmentRepository.findAllByOrderByCreatedAtDesc(pageable)
+                .map(this::toResponse);
     }
 
     @Transactional(readOnly = true)
-    public List<StockAdjustmentResponse> getAdjustmentsForMedicine(Long medicineId) {
+    public Page<StockAdjustmentResponse> getAdjustmentsForMedicine(Long medicineId, Pageable pageable) {
         medicineRepository.findById(medicineId)
                 .orElseThrow(() -> new ResourceNotFoundException("Medicine not found with id: " + medicineId));
 
-        return stockAdjustmentRepository.findByMedicine_IdOrderByCreatedAtDesc(medicineId).stream()
-                .map(this::toResponse)
-                .toList();
+        return stockAdjustmentRepository.findByMedicine_IdOrderByCreatedAtDesc(medicineId, pageable)
+                .map(this::toResponse);
     }
 
     private StockAdjustmentResponse applyAdjustment(Medicine medicine,

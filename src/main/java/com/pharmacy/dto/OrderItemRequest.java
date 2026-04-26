@@ -16,6 +16,8 @@ public class OrderItemRequest {
     @NotNull(message = "Medicine id is required")
     private Long medicineId;
 
+    private String batchNumber;
+
     @NotNull(message = "Quantity is required")
     @Min(value = 1, message = "Quantity must be at least 1")
     private Integer quantity;
