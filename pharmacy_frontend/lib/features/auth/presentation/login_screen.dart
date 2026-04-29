@@ -30,15 +30,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         _passwordController.text,
       );
 
-      if (mounted) {
-        final authState = ref.read(authProvider);
-        if (authState.hasError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(authState.error.toString())),
-          );
-        } else {
-          context.go('/dashboard');
-        }
+      if (!context.mounted) return;
+
+      final authState = ref.read(authProvider);
+      if (authState.hasError) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(authState.error.toString())),
+        );
+      } else {
+        context.go('/dashboard');
       }
     }
   }

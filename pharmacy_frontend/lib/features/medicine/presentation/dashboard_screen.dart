@@ -27,7 +27,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await ref.read(authProvider.notifier).logout();
-              if (mounted) context.go('/login');
+              if (!context.mounted) return;
+              context.go('/login');
             },
           ),
         ],

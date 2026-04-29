@@ -67,20 +67,18 @@ class _MedicineFormScreenState extends ConsumerState<MedicineFormScreen> {
           await ref.read(medicineRepositoryProvider).updateMedicine(widget.medicine!.id!, request);
         }
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Medicine saved successfully!')),
-          );
-          // Refresh the medicines list
-          ref.invalidate(searchMedicinesProvider);
-          context.pop();
-        }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Medicine saved successfully!')),
+        );
+        // Refresh the medicines list
+        ref.invalidate(searchMedicinesProvider);
+        context.pop();
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to save medicine: $e')),
-          );
-        }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to save medicine: $e')),
+        );
       } finally {
         if (mounted) {
           setState(() => _isLoading = false);

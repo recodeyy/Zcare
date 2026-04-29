@@ -41,18 +41,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           'role': _selectedRole,
         });
 
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Registration successful! Please login.')),
-          );
-          context.go('/login');
-        }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Registration successful! Please login.')),
+        );
+        context.go('/login');
       } catch (e) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.toString())),
-          );
-        }
+        if (!context.mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
       } finally {
         if (mounted) {
           setState(() => _isLoading = false);
