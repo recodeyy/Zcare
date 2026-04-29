@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -5,17 +6,19 @@ import '../../../core/network/dio_client.dart';
 import '../models/auth_request.dart';
 import '../repository/auth_repository.dart';
 
-final authProvider = StateNotifierProvider<AuthNotifier, AsyncValue<void>>((ref) {
-  final authRepository = ref.watch(authRepositoryProvider);
-  final sharedPreferences = ref.watch(sharedPreferencesProvider);
-  return AuthNotifier(authRepository, sharedPreferences);
+final authProvider = AsyncNotifierProvider<AuthNotifier, void>(() {
+  return AuthNotifier();
 });
 
-class AuthNotifier extends StateNotifier<AsyncValue<void>> {
-  final AuthRepository _authRepository;
-  final SharedPreferences _prefs;
+class AuthNotifier extends AsyncNotifier<void> {
+  late AuthRepository _authRepository;
+  late SharedPreferences _prefs;
 
-  AuthNotifier(this._authRepository, this._prefs) : super(const AsyncValue.data(null));
+  @override
+  FutureOr<void> build() {
+    _authRepository = ref.watch(authRepositoryProvider);
+    _prefs = ref.watch(sharedPreferencesProvider);
+  }
 
   Future<void> login(String username, String password) async {
     state = const AsyncValue.loading();
