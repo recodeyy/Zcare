@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/dio_client.dart';
 import '../models/auth_request.dart';
 import '../models/auth_response.dart';
+import '../models/register_request.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   final dio = ref.watch(dioProvider);
@@ -24,9 +25,9 @@ class AuthRepository {
     }
   }
 
-  Future<AuthResponse> register(Map<String, dynamic> registerData) async {
+  Future<AuthResponse> register(RegisterRequest request) async {
     try {
-      final response = await dio.post('/auth/register', data: registerData);
+      final response = await dio.post('/auth/register', data: request.toJson());
       return AuthResponse.fromJson(response.data);
     } catch (e) {
       throw Exception('Failed to register.');

@@ -19,9 +19,17 @@ class StockAdjustmentRepository {
     return StockAdjustmentResponse.fromJson(response.data);
   }
 
-  Future<List<StockAdjustmentResponse>> getAdjustments() async {
-    final response = await dio.get('/stock-adjustments');
-    return (response.data as List)
+  Future<List<StockAdjustmentResponse>> getAllAdjustments({int page = 0, int size = 20}) async {
+    final response = await dio.get('/stock-adjustments', queryParameters: {'page': page, 'size': size});
+    // The backend returns a Page object, we need to extract the content
+    return (response.data['content'] as List)
+        .map((e) => StockAdjustmentResponse.fromJson(e))
+        .toList();
+  }
+
+  Future<List<StockAdjustmentResponse>> getAdjustmentsByMedicine(int medicineId, {int page = 0, int size = 20}) async {
+    final response = await dio.get('/stock-adjustments/medicine/$medicineId', queryParameters: {'page': page, 'size': size});
+    return (response.data['content'] as List)
         .map((e) => StockAdjustmentResponse.fromJson(e))
         .toList();
   }

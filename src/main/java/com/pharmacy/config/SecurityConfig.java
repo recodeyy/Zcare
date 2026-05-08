@@ -66,7 +66,7 @@ public class SecurityConfig {
             .headers(headers -> headers
                 .frameOptions(frame -> frame.sameOrigin())
                 .contentSecurityPolicy(csp -> csp
-                    .policyDirectives("default-src 'self'; connect-src 'self' http://localhost:3000 http://localhost:5173")
+                    .policyDirectives("default-src 'self'; connect-src 'self' http://localhost:*")
                 )
             )
             .exceptionHandling(exceptions -> exceptions
@@ -92,6 +92,7 @@ public class SecurityConfig {
         CorsConfiguration config = new CorsConfiguration();
         List<String> origins = Arrays.asList(allowedOrigins.split(","));
         config.setAllowedOrigins(origins);
+        config.addAllowedOriginPattern("http://localhost:*"); // Allow all localhost ports for development
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

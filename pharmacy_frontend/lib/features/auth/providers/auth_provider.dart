@@ -40,3 +40,8 @@ class AuthNotifier extends AsyncNotifier<void> {
     state = const AsyncValue.data(null);
   }
 }
+
+final userRoleProvider = Provider<String?>((ref) {
+  final prefs = ref.watch(sharedPreferencesProvider);
+  return prefs.getString('role');
+});

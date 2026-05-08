@@ -36,9 +36,42 @@ class MedicineRepository {
   }
 
   Future<List<MedicineResponse>> searchMedicines(String query) async {
-    final response = await dio.get('/medicines/search?name=$query');
+    final response = await dio.get('/medicines/search', queryParameters: {'name': query});
     return (response.data as List)
         .map((e) => MedicineResponse.fromJson(e))
         .toList();
+  }
+
+  Future<List<MedicineResponse>> getExpiringSoon({int days = 30}) async {
+    final response = await dio.get('/medicines/expiring-soon', queryParameters: {'days': days});
+    return (response.data as List)
+        .map((e) => MedicineResponse.fromJson(e))
+        .toList();
+  }
+
+  Future<List<MedicineResponse>> getLowStock({int threshold = 10}) async {
+    final response = await dio.get('/medicines/low-stock', queryParameters: {'threshold': threshold});
+    return (response.data as List)
+        .map((e) => MedicineResponse.fromJson(e))
+        .toList();
+  }
+
+  Future<List<MedicineResponse>> getExpired() async {
+    final response = await dio.get('/medicines/expired');
+    return (response.data as List)
+        .map((e) => MedicineResponse.fromJson(e))
+        .toList();
+  }
+
+  Future<List<MedicineResponse>> getInactiveMedicines() async {
+    final response = await dio.get('/medicines/inactive');
+    return (response.data as List)
+        .map((e) => MedicineResponse.fromJson(e))
+        .toList();
+  }
+
+  Future<MedicineResponse> restoreMedicine(int id) async {
+    final response = await dio.patch('/medicines/$id/restore');
+    return MedicineResponse.fromJson(response.data);
   }
 }

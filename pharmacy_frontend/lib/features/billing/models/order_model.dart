@@ -1,46 +1,55 @@
 class OrderItemRequest {
   final int medicineId;
+  final String? batchNumber;
   final int quantity;
 
-  OrderItemRequest({required this.medicineId, required this.quantity});
+  OrderItemRequest({
+    required this.medicineId,
+    this.batchNumber,
+    required this.quantity,
+  });
 
   Map<String, dynamic> toJson() {
     return {
       'medicineId': medicineId,
+      'batchNumber': batchNumber,
       'quantity': quantity,
     };
   }
 }
 
 class OrderItemResponse {
-  final int medicineId;
+  final int id;
   final String medicineName;
-  final String batchNumber;
+  final String? batchNumber;
   final int quantity;
-  final double lineTotal;
+  final double unitPrice;
+  final double totalPrice;
 
   OrderItemResponse({
-    required this.medicineId,
+    required this.id,
     required this.medicineName,
-    required this.batchNumber,
+    this.batchNumber,
     required this.quantity,
-    required this.lineTotal,
+    required this.unitPrice,
+    required this.totalPrice,
   });
 
   factory OrderItemResponse.fromJson(Map<String, dynamic> json) {
     return OrderItemResponse(
-      medicineId: json['medicineId'] ?? 0,
-      medicineName: json['medicineName'] ?? '',
-      batchNumber: json['batchNumber'] ?? '',
-      quantity: json['quantity'] ?? 0,
-      lineTotal: (json['lineTotal'] ?? 0.0).toDouble(),
+      id: json['id'],
+      medicineName: json['medicineName'],
+      batchNumber: json['batchNumber'],
+      quantity: json['quantity'],
+      unitPrice: (json['unitPrice'] as num).toDouble(),
+      totalPrice: (json['totalPrice'] as num).toDouble(),
     );
   }
 }
 
 class CustomerOrderResponse {
   final int id;
-  final String orderDate;
+  final DateTime orderDate;
   final String createdBy;
   final double totalAmount;
   final List<OrderItemResponse> items;
@@ -56,13 +65,12 @@ class CustomerOrderResponse {
   factory CustomerOrderResponse.fromJson(Map<String, dynamic> json) {
     return CustomerOrderResponse(
       id: json['id'],
-      orderDate: json['orderDate'] ?? '',
-      createdBy: json['createdBy'] ?? '',
-      totalAmount: (json['totalAmount'] ?? 0.0).toDouble(),
-      items: (json['items'] as List?)
-              ?.map((i) => OrderItemResponse.fromJson(i))
-              .toList() ??
-          [],
+      orderDate: DateTime.parse(json['orderDate']),
+      createdBy: json['createdBy'],
+      totalAmount: (json['totalAmount'] as num).toDouble(),
+      items: (json['items'] as List)
+          .map((e) => OrderItemResponse.fromJson(e))
+          .toList(),
     );
   }
 }
